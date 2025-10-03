@@ -23,6 +23,8 @@ export const useTaskStore = defineStore('task', {
     searchQuery: '',
     searchResults: [] as Task[],
     isSearching: false,
+    // Sorting state
+    sortBy: 'order' as 'order' | 'priority' | 'title',
   }),
 
   getters: {
@@ -36,11 +38,26 @@ export const useTaskStore = defineStore('task', {
     },
     
     filteredTasks: (state: any) => {
+      let tasks: Task[]
+      
       if (state.searchQuery && state.isSearching) {
-        return state.searchResults
+        tasks = state.searchResults
+      } else {
+        tasks = state.tasksForCurrentDate
       }
-      const currentDateTasks = state.tasksForCurrentDate
-      return currentDateTasks
+
+      // Sort tasks based on sortBy
+      return [...tasks].sort((a, b) => {
+        if (state.sortBy === 'priority') {
+          const priorityOrder = { high: 0, medium: 1, low: 2 }
+          return priorityOrder[a.priority] - priorityOrder[b.priority]
+        } else if (state.sortBy === 'title') {
+          return a.title.localeCompare(b.title)
+        } else {
+          // Default to custom order
+          return a.order - b.order
+        }
+      })
     },
   },
 
@@ -163,6 +180,36 @@ export const useTaskStore = defineStore('task', {
       this.searchQuery = ''
       this.searchResults = []
       this.isSearching = false
+    },
+
+    // Sorting functionality
+    setSortBy(sortBy: 'order' | 'priority' | 'title') {
+      this.sortBy = sortBy
+    },
+
+    async updateTaskPriority(taskId: number, priority: 'high' | 'medium' | 'low') {
+      this.error = null
+      
+      try {
+        const { put } = useApi()
+        const response = await put(`/tasks/${taskId}`, { priority })
+        
+        if (response.data) {
+          // Update task in local state - use reactive update
+          const index = this.tasks.findIndex((t: Task) => t.id === taskId)
+          if (index !== -1) {
+            // Update the specific property to maintain reactivity
+            this.tasks[index].priority = response.data.priority
+            this.tasks[index].updated_at = response.data.updated_at
+          }
+        }
+        
+        return response.data
+      } catch (error: any) {
+        this.error = error.message || 'Failed to update task priority'
+        console.error('Failed to update task priority:', error)
+        return null
+      }
     },
   },
 })

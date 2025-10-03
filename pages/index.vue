@@ -158,6 +158,11 @@
           </button>
         </div>
 
+        <!-- Sort Controls -->
+        <div v-if="!isSearching && filteredTasks.length > 0" class="mb-4">
+          <SortControls />
+        </div>
+
         <!-- Empty State (shown when no tasks) -->
         <div v-if="!isSearching && tasks.length === 0" class="flex flex-col items-center justify-center min-h-96">
           <h2 class="text-2xl font-bold text-gray-900 mb-6">What do you have in mind?</h2>
@@ -219,20 +224,73 @@
 
               <!-- Task Text -->
               <div class="flex-1">
-                <p
-                  class="text-gray-900"
-                  :class="{ 'line-through text-gray-500': task.status === 'completed' }"
-                >
-                  {{ task.title }}
-                </p>
-                <div class="flex items-center gap-2 mt-1">
-                  <p v-if="task.priority" class="text-xs text-gray-500">
-                  Priority: {{ task.priority }}
-                </p>
-                  <!-- Show date when in search mode -->
-                  <p v-if="isSearching" class="text-xs text-gray-500">
-                    {{ formatDate(task.date) }}
+                <div class="flex items-center">
+                  <p
+                    class="text-gray-900"
+                    :class="{ 'line-through text-gray-500': task.status === 'completed' }"
+                  >
+                    {{ task.title }}
                   </p>
+                  <div class="flex items-center gap-2 mt-1">
+                    <!-- Priority Selection -->
+                    <div class="flex items-center ml-2">
+                      <div class="relative">
+                        <button
+                          @click="togglePriorityMenu(task.id)"
+                          class="flex items-center text-xs rounded-full px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          :class="{
+                            'bg-red-100 text-red-800': task.priority === 'high',
+                            'bg-yellow-100 text-yellow-800': task.priority === 'medium',
+                            'bg-green-100 text-green-800': task.priority === 'low'
+                          }"
+                        >
+                          {{ task.priority }}
+                          <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                          </svg>
+                        </button>
+  
+                        <!-- Priority dropdown menu -->
+                        <div
+                          v-if="priorityMenuOpen === task.id"
+                          class="absolute right-0 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                        >
+                          <div class="py-1" role="menu" aria-orientation="vertical">
+                            <button
+                              @click="updatePriority(task.id, 'high')"
+                              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              :class="{ 'bg-gray-100': task.priority === 'high' }"
+                              role="menuitem"
+                            >
+                              High
+                            </button>
+                            <button
+                              @click="updatePriority(task.id, 'medium')"
+                              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              :class="{ 'bg-gray-100': task.priority === 'medium' }"
+                              role="menuitem"
+                            >
+                              Medium
+                            </button>
+                            <button
+                              @click="updatePriority(task.id, 'low')"
+                              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              :class="{ 'bg-gray-100': task.priority === 'low' }"
+                              role="menuitem"
+                            >
+                              Low
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Show date when in search mode -->
+                    <p v-if="isSearching" class="text-xs text-gray-500">
+                      {{ formatDate(task.date) }}
+                    </p>
+                  </div>
+                  
                 </div>
               </div>
 
@@ -376,7 +434,8 @@ const {
   updateTask, 
   deleteTask,
   clearSearch,
-  setCurrentDate
+  setCurrentDate,
+  updateTaskPriority
 } = useTask()
 
 // Date filtering state
@@ -540,6 +599,9 @@ const deleteOperationId = ref(null)
 // Profile dropdown
 const showProfileDropdown = ref(false)
 
+// Priority menu state
+const priorityMenuOpen = ref(null)
+
 // Profile dropdown actions
 const toggleProfileDropdown = () => {
   showProfileDropdown.value = !showProfileDropdown.value
@@ -559,6 +621,22 @@ const handleLogout = async () => {
 const closeDropdown = (event) => {
   if (!event.target.closest('.relative')) {
     showProfileDropdown.value = false
+    priorityMenuOpen.value = null
+  }
+}
+
+// Priority menu actions
+const togglePriorityMenu = (taskId) => {
+  priorityMenuOpen.value = priorityMenuOpen.value === taskId ? null : taskId
+}
+
+const updatePriority = async (taskId, priority) => {
+  try {
+    await updateTaskPriority(taskId, priority)
+    priorityMenuOpen.value = null
+  } catch (error) {
+    console.error('Failed to update task priority:', error)
+    alert('Failed to update task priority. Please try again.')
   }
 }
 
