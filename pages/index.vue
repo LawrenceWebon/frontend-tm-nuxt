@@ -264,7 +264,7 @@
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                 </svg>
                 <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               </button>
@@ -433,6 +433,11 @@ const addTask = async () => {
       date: new Date().toISOString().split('T')[0]
     })
     
+    // Verify the response has the expected data
+    if (!response.data || !response.data.id) {
+      throw new Error('Invalid response from server')
+    }
+    
     // Add the new task to the list
     tasks.value.unshift(response.data)
     newTask.value = ''
@@ -496,14 +501,27 @@ const deleteTask = async (event) => {
     return
   }
   
-  
   try {
     isDeleting.value = true
     // Clear the operation ID to prevent duplicates
     deleteOperationId.value = null
     
-    await del(`/tasks/${taskToDelete.value.id}`)
-    tasks.value = tasks.value.filter(t => t.id !== taskToDelete.value.id)
+    // Store the task ID before deletion
+    const taskIdToDelete = taskToDelete.value.id
+    
+    // Verify task exists in local state
+    const taskExists = tasks.value.some(t => t.id === taskIdToDelete)
+    if (!taskExists) {
+      console.warn(`Task ${taskIdToDelete} not found in local state, skipping deletion`)
+      showDeleteModal.value = false
+      taskToDelete.value = null
+      return
+    }
+    
+    await del(`/tasks/${taskIdToDelete}`)
+    
+    // Remove from local state immediately after successful API call
+    tasks.value = tasks.value.filter(t => t.id !== taskIdToDelete)
     showDeleteModal.value = false
     taskToDelete.value = null
   } catch (error) {
@@ -511,11 +529,15 @@ const deleteTask = async (event) => {
     
     // Handle 404 - task not found (already deleted or doesn't exist)
     if (error.status === 404) {
-      tasks.value = tasks.value.filter(t => t.id !== taskToDelete.value.id)
+      // Task was already deleted, remove from local state silently
+      const taskIdToDelete = taskToDelete.value.id
+      tasks.value = tasks.value.filter(t => t.id !== taskIdToDelete)
       showDeleteModal.value = false
       taskToDelete.value = null
     } else {
-      alert('Failed to delete task. Please try again.')
+      // For other errors, show user-friendly message
+      console.error('Delete task error:', error)
+      alert(`Failed to delete task: ${error.message || 'Unknown error'}`)
     }
   } finally {
     isDeleting.value = false
