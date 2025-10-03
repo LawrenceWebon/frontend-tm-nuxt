@@ -11,18 +11,7 @@
 
       <!-- Search Bar -->
       <div class="flex-1 max-w-md mx-8">
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-          </div>
-          <input
-            type="text"
-            placeholder="Search"
-            class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-          />
-        </div>
+        <SearchBar />
       </div>
 
       <!-- Auto-logout Warning -->
@@ -85,18 +74,30 @@
         <nav class="p-4">
           <div class="space-y-1">
             <!-- Today (Active) -->
-            <div class="bg-black text-white px-3 py-2 rounded-lg text-sm font-medium">
+            <div 
+              @click="selectDateFilter('today')"
+              class="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+              :class="selectedDateFilter === 'today' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'"
+            >
               Today
             </div>
             
             <!-- Yesterday -->
-            <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
+            <div 
+              @click="selectDateFilter('yesterday')"
+              class="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+              :class="selectedDateFilter === 'yesterday' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'"
+            >
               Yesterday
             </div>
             
-            <!-- Sunday, July 27 -->
-            <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-              Sunday, July 27
+            <!-- Day before yesterday -->
+            <div 
+              @click="selectDateFilter('dayBeforeYesterday')"
+              class="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+              :class="selectedDateFilter === 'dayBeforeYesterday' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'"
+            >
+              {{ formatDateForDisplay(dayBeforeYesterday) }}
             </div>
             
             <!-- Last week section -->
@@ -105,56 +106,32 @@
                 Last week
               </div>
               <div class="space-y-1 mt-2">
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Saturday, July 26
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Friday, July 25
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Thursday, July 24
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Wednesday, July 23
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Tuesday, July 22
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Monday, July 21
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Sunday, July 20
+                <div 
+                  v-for="(day, index) in lastWeekDays" 
+                  :key="index"
+                  @click="selectDateFilter('specific', day.date)"
+                  class="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+                  :class="selectedDateFilter === 'specific' && selectedSpecificDate === day.date ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'"
+                >
+                  {{ day.display }}
                 </div>
               </div>
             </div>
             
-            <!-- 3rd Week of July section -->
+            <!-- Week before last section -->
             <div class="pt-4">
               <div class="text-gray-400 text-xs font-medium px-3 py-1 uppercase tracking-wide">
-                3rd Week of July
+                Week before last
               </div>
               <div class="space-y-1 mt-2">
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Saturday, July 19
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Friday, July 18
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Thursday, July 17
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Wednesday, July 16
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Tuesday, July 15
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Monday, July 14
-                </div>
-                <div class="text-gray-700 px-3 py-2 text-sm hover:bg-gray-50 rounded-lg cursor-pointer">
-                  Sunday, July 13
+                <div 
+                  v-for="(day, index) in weekBeforeLastDays" 
+                  :key="index"
+                  @click="selectDateFilter('specific', day.date)"
+                  class="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+                  :class="selectedDateFilter === 'specific' && selectedSpecificDate === day.date ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'"
+                >
+                  {{ day.display }}
                 </div>
               </div>
             </div>
@@ -164,8 +141,25 @@
 
       <!-- Main Content -->
       <main class="flex-1 p-6">
+        <!-- Search Results Info -->
+        <div v-if="isSearching && searchQuery" class="mb-4 flex justify-between items-center">
+          <p class="text-sm text-gray-500">
+            <span v-if="filteredTasks.length > 0">Found {{ filteredTasks.length }} results for "{{ searchQuery }}"</span>
+            <span v-else>No results found for "{{ searchQuery }}"</span>
+          </p>
+          <button 
+            @click="clearSearch" 
+            class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+          >
+            <!-- <span>Clear search</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg> -->
+          </button>
+        </div>
+
         <!-- Empty State (shown when no tasks) -->
-        <div v-if="tasks.length === 0" class="flex flex-col items-center justify-center min-h-96">
+        <div v-if="!isSearching && tasks.length === 0" class="flex flex-col items-center justify-center min-h-96">
           <h2 class="text-2xl font-bold text-gray-900 mb-6">What do you have in mind?</h2>
           <div class="w-full max-w-2xl">
             <div class="relative">
@@ -173,7 +167,7 @@
                 v-model="newTask"
                 @keyup.enter="addTask"
                 type="text"
-                placeholder="Write the task you plan to do today here..."
+                :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
                 class="w-full px-4 py-4 pr-16 text-lg border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
               />
               <button
@@ -182,7 +176,7 @@
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                 </svg>
                 <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               </button>
@@ -201,9 +195,9 @@
           </div>
           
           <!-- Task Items Container -->
-          <div v-else class="flex-1 overflow-y-auto space-y-3" style="width: 80%; margin: 0 auto;">
+          <div v-else-if="filteredTasks.length > 0" class="flex-1 overflow-y-auto space-y-3" style="width: 80%; margin: 0 auto;">
             <div
-              v-for="task in tasks"
+              v-for="task in filteredTasks"
               :key="task.id"
               class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
@@ -231,9 +225,15 @@
                 >
                   {{ task.title }}
                 </p>
-                <p v-if="task.priority" class="text-xs text-gray-500 mt-1">
+                <div class="flex items-center gap-2 mt-1">
+                  <p v-if="task.priority" class="text-xs text-gray-500">
                   Priority: {{ task.priority }}
                 </p>
+                  <!-- Show date when in search mode -->
+                  <p v-if="isSearching" class="text-xs text-gray-500">
+                    {{ formatDate(task.date) }}
+                  </p>
+                </div>
               </div>
 
               <!-- Delete Button -->
@@ -248,6 +248,41 @@
             </div>
           </div>
 
+          <!-- No tasks for selected date message -->
+          <div v-else-if="!isSearching && tasks.length > 0 && filteredTasks.length === 0" class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+              <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No tasks for this date</h3>
+              <p class="text-gray-500 mb-4">
+                <span v-if="selectedDateFilter === 'today'">You don't have any tasks for today.</span>
+                <span v-else-if="selectedDateFilter === 'yesterday'">You don't have any tasks for yesterday.</span>
+                <span v-else-if="selectedDateFilter === 'dayBeforeYesterday'">You don't have any tasks for {{ formatDateForDisplay(dayBeforeYesterday) }}.</span>
+                <span v-else-if="selectedDateFilter === 'specific'">You don't have any tasks for {{ formatDateForDisplay(selectedSpecificDate) }}.</span>
+                <span v-else>You don't have any tasks for the selected date.</span>
+              </p>
+              <button 
+                @click="selectDateFilter('today')"
+                class="inline-flex items-center px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                View Today's Tasks
+              </button>
+            </div>
+          </div>
+
+          <!-- No search results message -->
+          <div v-else-if="isSearching" class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+              <p class="text-gray-500">No tasks match your search</p>
+            </div>
+          </div>
+
           <!-- Add New Task Input (fixed at bottom) -->
           <div class="p-6 bg-white" style="width: 80%; margin: 0 auto;">
             <div class="relative">
@@ -255,7 +290,7 @@
                 v-model="newTask"
                 @keyup.enter="addTask"
                 type="text"
-                placeholder="What else do you need to do?"
+                :placeholder="`What else do you need to do ${getPlaceholderText()}?`"
                 class="w-full px-4 py-3 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
               />
               <button
@@ -306,7 +341,7 @@
             Cancel
           </button>
           <button
-            @click="deleteTask($event)"
+            @click="handleDeleteTask($event)"
             :disabled="isDeleting"
             class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
@@ -322,11 +357,32 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAuth } from '~/composables/useAuth'
+import { useTask } from '~/composables/useTask'
 import { useRouter } from 'vue-router'
 
 // Authentication
 const { isAuthenticated, checkAuth, user, logout } = useAuth()
 const router = useRouter()
+
+// Task management
+const { 
+  tasks, 
+  filteredTasks, 
+  isSearching, 
+  searchQuery, 
+  loading: isLoading, 
+  fetchTasks, 
+  createTask, 
+  updateTask, 
+  deleteTask,
+  clearSearch,
+  setCurrentDate
+} = useTask()
+
+// Date filtering state
+const selectedDateFilter = ref('today')
+const selectedSpecificDate = ref('')
+
 
 // Auto-logout functionality
 const { startAutoLogout, stopAutoLogout, getMinutesUntilLogout } = useAutoLogout()
@@ -355,13 +411,125 @@ const handleActivity = () => {
   }
 }
 
-// API
-const { get, post, put, del } = useApi()
-
 // Task management
-const tasks = ref([])
 const newTask = ref('')
-const isLoading = ref(false)
+
+// Helper function to format dates
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString()
+}
+
+// Date filtering computed properties
+const today = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
+
+const yesterday = computed(() => {
+  const date = new Date()
+  date.setDate(date.getDate() - 1)
+  return date.toISOString().split('T')[0]
+})
+
+const dayBeforeYesterday = computed(() => {
+  const date = new Date()
+  date.setDate(date.getDate() - 2)
+  return date.toISOString().split('T')[0]
+})
+
+const lastWeekDays = computed(() => {
+  const days = []
+  const today = new Date()
+  
+  // Get last week (7 days ago to 1 day ago)
+  for (let i = 7; i >= 1; i--) {
+    const date = new Date(today)
+    date.setDate(date.getDate() - i)
+    const dateString = date.toISOString().split('T')[0]
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
+    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    
+    days.push({
+      date: dateString,
+      display: `${dayName}, ${monthDay}`
+    })
+  }
+  
+  return days
+})
+
+const weekBeforeLastDays = computed(() => {
+  const days = []
+  const today = new Date()
+  
+  // Get week before last (14 days ago to 8 days ago)
+  for (let i = 14; i >= 8; i--) {
+    const date = new Date(today)
+    date.setDate(date.getDate() - i)
+    const dateString = date.toISOString().split('T')[0]
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
+    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    
+    days.push({
+      date: dateString,
+      display: `${dayName}, ${monthDay}`
+    })
+  }
+  
+  return days
+})
+
+// Date filtering methods
+const selectDateFilter = (filterType, specificDate = null) => {
+  selectedDateFilter.value = filterType
+  selectedSpecificDate.value = specificDate || ''
+  
+  // Clear search when changing date filter
+  clearSearch()
+  
+  let targetDate = ''
+  
+  switch (filterType) {
+    case 'today':
+      targetDate = today.value
+      break
+    case 'yesterday':
+      targetDate = yesterday.value
+      break
+    case 'dayBeforeYesterday':
+      targetDate = dayBeforeYesterday.value
+      break
+    case 'specific':
+      targetDate = specificDate
+      break
+    default:
+      targetDate = today.value
+  }
+  
+  setCurrentDate(targetDate)
+}
+
+const formatDateForDisplay = (dateString) => {
+  const date = new Date(dateString)
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
+  const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return `${dayName}, ${monthDay}`
+}
+
+const getPlaceholderText = () => {
+  switch (selectedDateFilter.value) {
+    case 'today':
+      return 'today'
+    case 'yesterday':
+      return 'yesterday'
+    case 'dayBeforeYesterday':
+      return `on ${formatDateForDisplay(dayBeforeYesterday.value)}`
+    case 'specific':
+      return `on ${formatDateForDisplay(selectedSpecificDate.value)}`
+    default:
+      return 'today'
+  }
+}
 
 // Delete confirmation modal
 const showDeleteModal = ref(false)
@@ -402,50 +570,40 @@ const handleKeydown = (event) => {
 }
 
 // Task actions
-const fetchTasks = async () => {
-  try {
-    isLoading.value = true
-    const response = await get('/tasks')
-    tasks.value = response.data || []
-  } catch (error) {
-    console.error('Failed to fetch tasks:', error)
-    // Show error message to user
-    alert('Failed to load tasks. Please try again.')
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// Refresh tasks to ensure data synchronization
-const refreshTasks = async () => {
-  await fetchTasks()
-}
-
 const addTask = async () => {
   if (!newTask.value.trim()) return
   
   try {
-    isLoading.value = true
-    const response = await post('/tasks', {
+    // Get the currently selected date instead of always using today
+    let targetDate = ''
+    
+    switch (selectedDateFilter.value) {
+      case 'today':
+        targetDate = today.value
+        break
+      case 'yesterday':
+        targetDate = yesterday.value
+        break
+      case 'dayBeforeYesterday':
+        targetDate = dayBeforeYesterday.value
+        break
+      case 'specific':
+        targetDate = selectedSpecificDate.value
+        break
+      default:
+        targetDate = today.value
+    }
+    
+    await createTask({
       title: newTask.value.trim(),
       status: 'pending',
       priority: 'medium',
-      date: new Date().toISOString().split('T')[0]
+      date: targetDate
     })
-    
-    // Verify the response has the expected data
-    if (!response.data || !response.data.id) {
-      throw new Error('Invalid response from server')
-    }
-    
-    // Add the new task to the list
-    tasks.value.unshift(response.data)
     newTask.value = ''
   } catch (error) {
     console.error('Failed to create task:', error)
     alert('Failed to create task. Please try again.')
-  } finally {
-    isLoading.value = false
   }
 }
 
@@ -456,16 +614,10 @@ const toggleTask = async (taskId) => {
     
     const newStatus = task.status === 'completed' ? 'pending' : 'completed'
     
-    const response = await put(`/tasks/${taskId}`, {
+    await updateTask(taskId, {
       ...task,
       status: newStatus
     })
-    
-    // Update the task in the list
-    const index = tasks.value.findIndex(t => t.id === taskId)
-    if (index !== -1) {
-      tasks.value[index] = response.data
-    }
   } catch (error) {
     console.error('Failed to update task:', error)
     alert('Failed to update task. Please try again.')
@@ -484,7 +636,7 @@ const cancelDelete = () => {
   deleteOperationId.value = null
 }
 
-const deleteTask = async (event) => {
+const handleDeleteTask = async (event) => {
   // Prevent default behavior and stop propagation
   if (event) {
     event.preventDefault()
@@ -518,27 +670,13 @@ const deleteTask = async (event) => {
       return
     }
     
-    await del(`/tasks/${taskIdToDelete}`)
+    await deleteTask(taskIdToDelete)
     
-    // Remove from local state immediately after successful API call
-    tasks.value = tasks.value.filter(t => t.id !== taskIdToDelete)
     showDeleteModal.value = false
     taskToDelete.value = null
   } catch (error) {
     console.error('Failed to delete task:', error)
-    
-    // Handle 404 - task not found (already deleted or doesn't exist)
-    if (error.status === 404) {
-      // Task was already deleted, remove from local state silently
-      const taskIdToDelete = taskToDelete.value.id
-      tasks.value = tasks.value.filter(t => t.id !== taskIdToDelete)
-      showDeleteModal.value = false
-      taskToDelete.value = null
-    } else {
-      // For other errors, show user-friendly message
-      console.error('Delete task error:', error)
       alert(`Failed to delete task: ${error.message || 'Unknown error'}`)
-    }
   } finally {
     isDeleting.value = false
   }
@@ -548,6 +686,9 @@ const deleteTask = async (event) => {
 onMounted(async () => {
   // Check authentication
   checkAuth()
+  
+  // Initialize date filter to today
+  setCurrentDate(today.value)
   
   // Load tasks from API
   await fetchTasks()
