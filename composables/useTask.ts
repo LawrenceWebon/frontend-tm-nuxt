@@ -37,6 +37,7 @@ export const useTask = () => {
     // Sorting actions
     setSortBy: taskStore.setSortBy,
     updateTaskPriority: taskStore.updateTaskPriority,
+    reorderTasks: taskStore.reorderTasks,
   }
 }
 

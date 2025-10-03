@@ -211,5 +211,51 @@ export const useTaskStore = defineStore('task', {
         return null
       }
     },
+
+    async reorderTasks(tasks: Task[]) {
+      // Update local state immediately for responsive UI
+      const updatedTasks = tasks.map((task, index) => ({
+        ...task,
+        order: index
+      }))
+
+      // Store original tasks for potential rollback
+      const originalTasks = [...this.tasks]
+
+      // Prepare data for API
+      const reorderData = updatedTasks.map(task => ({
+        id: task.id,
+        order: task.order
+      }))
+
+      // Send to API
+      const { fetchWithAuth } = useApi()
+
+      try {
+        const response = await fetchWithAuth('/tasks/reorder', {
+          method: 'PUT',
+          body: JSON.stringify({ tasks: reorderData })
+        })
+
+        if (!response.success) {
+          console.error('❌ API error response:', response)
+          throw new Error(`Failed to reorder tasks: ${response.status} ${response.message}`)
+        }
+
+        // Update local state with the new order instead of fetching from API
+        this.tasks = this.tasks.map(task => {
+          const updatedTask = updatedTasks.find(t => t.id === task.id)
+          return updatedTask || task
+        })
+
+        return true
+      } catch (error: any) {
+        console.error('❌ TaskStore reorderTasks error:', error)
+        this.error = error.message
+        // Revert local state on error
+        this.tasks = originalTasks
+        return false
+      }
+    },
   },
 })
