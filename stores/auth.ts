@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useApi } from '~/composables/useApi'
 
 export interface User {
   id: number
@@ -96,21 +97,8 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       try {
         if (this.token) {
-          const csrfToken = await this.getCsrfToken()
-          
-          const response = await fetch('http://localhost/api/logout', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${this.token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Origin': window.location.origin,
-              ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
-            },
-            credentials: 'include'
-          })
-          
-          const responseData = await response.json()
+          const { logout: apiLogout } = useApi()
+          await apiLogout()
         }
       } catch (error) {
         console.error('Logout API call failed:', error)

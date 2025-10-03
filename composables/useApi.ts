@@ -241,8 +241,13 @@ export function useApi() {
     // If token is being refreshed, queue the request
     if (isRefreshing && !skipAuth) {
       return new Promise((resolve, reject) => {
-        requestQueue.push(() => {
-          makeRequest().then(resolve).catch(reject)
+        requestQueue.push(async () => {
+          try {
+            const result = await makeRequest()
+            resolve(result)
+          } catch (error) {
+            reject(error)
+          }
         })
       })
     }
@@ -327,6 +332,40 @@ export function useApi() {
     }
   }
 
+  // Logout method
+  const logout = async (): Promise<ApiResponse> => {
+    try {
+      const response = await fetch(`${baseURL}/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authStore.token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Content-Length': '0',
+          'Origin': window.location.origin
+        },
+        body: '', // Empty body as expected by the API
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return {
+          data: data,
+          message: data.message || 'Logged out successfully',
+          status: response.status,
+          success: true
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+      }
+    } catch (error) {
+      console.error('Logout failed:', error)
+      throw error
+    }
+  }
+
   return {
     // Core methods
     fetchWithAuth,
@@ -335,6 +374,7 @@ export function useApi() {
     put,
     patch,
     del,
+    logout,
     
     // Advanced methods
     uploadFile,
