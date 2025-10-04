@@ -1,10 +1,10 @@
 <template>
-  <div class="flex items-center space-x-2 mb-4">
+  <div class="flex items-center space-x-2">
     <span class="text-sm text-gray-500">Sort by:</span>
     <div class="flex space-x-1">
       <button
         @click="setSortBy('order')"
-        class="px-3 py-1 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+        class="px-3 py-1 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
         :class="{
           'bg-gray-200 text-black': sortBy === 'order',
           'hover:bg-gray-100': sortBy !== 'order'
@@ -14,7 +14,7 @@
       </button>
       <button
         @click="setSortBy('priority')"
-        class="px-3 py-1 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+        class="px-3 py-1 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
         :class="{
           'bg-gray-200 text-black': sortBy === 'priority',
           'hover:bg-gray-100': sortBy !== 'priority'
@@ -24,7 +24,7 @@
       </button>
       <button
         @click="setSortBy('title')"
-        class="px-3 py-1 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+        class="px-3 py-1 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
         :class="{
           'bg-gray-200 text-black': sortBy === 'title',
           'hover:bg-gray-100': sortBy !== 'title'

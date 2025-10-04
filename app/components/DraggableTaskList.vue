@@ -3,26 +3,19 @@
     <draggable
       v-model="dragTasks"
       item-key="id"
-      handle=".drag-handle"
       ghost-class="bg-gray-100"
       @end="handleReorder"
       :disabled="isSearching"
     >
       <template #item="{ element }">
-        <div class="mb-2">
+        <div 
+          class="mb-2"
+          :class="{ 'cursor-move': !isSearching && sortBy === 'order' }"
+        >
           <TaskItem
             :task="element"
             @delete-task="$emit('delete-task', $event)"
-          >
-            <template #handle>
-              <div
-                v-if="!isSearching && sortBy === 'order'"
-                class="drag-handle cursor-move mr-2 text-gray-400 hover:text-gray-600"
-              >
-                <GripVertical :size="16" />
-              </div>
-            </template>
-          </TaskItem>
+          />
         </div>
       </template>
     </draggable>
@@ -32,7 +25,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import draggable from 'vuedraggable'
-import { GripVertical } from 'lucide-vue-next'
 import { useTask } from '../composables/useTask'
 import { useNotification } from '../composables/useNotification'
 import type { Task } from '../../stores/task'

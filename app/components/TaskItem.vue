@@ -1,13 +1,11 @@
 <template>
   <li class="flex items-center p-3 bg-white rounded-md shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-    <!-- Drag handle slot -->
-    <slot name="handle"></slot>
 
     <!-- Checkbox -->
     <button
       @click="toggleTask(task.id)"
       class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center mr-4 hover:border-gray-400 transition-colors"
-      :class="{ 'bg-black border-black': task.status === 'completed' }"
+      :class="{ 'bg-black border-gray-200': task.status === 'completed' }"
     >
       <svg
         v-if="task.status === 'completed'"
@@ -21,7 +19,7 @@
 
     <!-- Task Text -->
     <div class="flex-1">
-      <div class="flex items-center">
+      <div class="flex items-center justify-between">
         <!-- Editable Title -->
         <div v-if="isEditing && task.status !== 'completed'" class="flex-1">
           <input
@@ -30,7 +28,7 @@
             @keyup.enter="saveTitle"
             @blur="saveTitle"
             @keyup.escape="cancelEdit"
-            class="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent text-sm"
             :class="{ 'line-through text-gray-500': isCompleted }"
           />
         </div>
@@ -38,7 +36,7 @@
         <p
           v-else
           @click="startEdit"
-          class="text-gray-900 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+          class="text-gray-900 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors text-sm"
           :class="{ 
             'line-through text-gray-500': task.status === 'completed',
             'cursor-not-allowed': task.status === 'completed'
@@ -48,7 +46,7 @@
         </p>
         <div class="flex items-center gap-2 mt-1">
           <!-- Priority Selection -->
-          <div class="flex items-center ml-2">
+          <div class="flex items-center ml-2 mr-2">
             <div class="relative">
               <button
                 @click="task.status !== 'completed' ? togglePriorityMenu(task.id) : null"
@@ -77,7 +75,7 @@
               <!-- Priority dropdown menu -->
               <div
                 v-if="priorityMenuOpen === task.id"
-                class="absolute right-0 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                class="absolute right-0 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-gray-200 ring-opacity-5 z-10"
               >
                 <div class="py-1" role="menu" aria-orientation="vertical">
                   <button
@@ -120,7 +118,7 @@
     <!-- Delete Button -->
     <button
       @click="confirmDelete(task)"
-      class="w-6 h-6 text-gray-400 hover:text-red-500 transition-colors"
+      class="w-6 h-6 text-gray-400 hover:text-black transition-colors"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

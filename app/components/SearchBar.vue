@@ -10,7 +10,7 @@
       v-model="query"
       type="text"
       placeholder="Search tasks..."
-      class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-gray-200 focus:border-gray-200 sm:text-sm"
       @input="debouncedSearch"
     />
     

@@ -4,7 +4,7 @@
     <div class="w-full max-w-md px-6">
       <!-- Logo -->
       <div class="flex justify-center mb-6">
-        <div class="w-16 h-16 flex items-center justify-center">
+        <div class="w-12 h-12 flex items-center justify-center">
           <img :src="logoUrl" alt="Logo">
         </div>
       </div>

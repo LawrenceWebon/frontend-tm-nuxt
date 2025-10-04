@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="h-screen bg-white flex flex-col">
     <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
       <!-- Logo -->
       <div class="flex items-center">
         <div class="w-8 h-8 rounded-sm flex items-center justify-center">
@@ -13,20 +13,6 @@
       <div class="flex-1 max-w-md mx-8">
         <SearchBar />
       </div>
-
-
-      <!-- Refresh Button -->
-      <!-- <button
-        @click="refreshTasks"
-        :disabled="isLoading"
-        class="mr-4 px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-        title="Refresh tasks"
-      >
-        <svg class="w-4 h-4 mr-1" :class="{ 'animate-spin': isLoading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-        </svg>
-        Refresh
-      </button> -->
 
       <!-- User Avatar with Dropdown -->
       <div class="relative">
@@ -61,10 +47,10 @@
       </div>
     </header>
 
-    <div class="flex">
+    <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
-      <aside class="w-64 bg-white min-h-screen">
-        <nav class="p-4">
+      <aside class="w-64 bg-white flex flex-col">
+        <nav class="p-4 overflow-y-auto flex-1 scrollbar-hide">
           <div class="space-y-1">
             <!-- Today (Active) -->
             <div 
@@ -114,7 +100,7 @@
             <!-- Week before last section -->
             <div class="pt-4">
               <div class="text-gray-400 text-xs font-medium px-3 py-1 tracking-wide">
-                3rd Week of {{ new Date(weekBeforeLastDays[0].date).toLocaleString('default', { month: 'long' }) }}
+                {{ getWeekNumber(weekBeforeLastDays[0].date) }} Week of {{ new Date(weekBeforeLastDays[0].date).toLocaleString('default', { month: 'long' }) }}
               </div>
               <div class="space-y-1 mt-2">
                 <div 
@@ -133,9 +119,9 @@
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 flex flex-col overflow-hidden">
         <!-- Search Results Info -->
-        <div v-if="isSearching && searchQuery" class="mb-4 flex justify-between items-center">
+        <div v-if="isSearching && searchQuery" class="mb-4 flex justify-between items-center px-6 pt-6 flex-shrink-0">
           <p class="text-sm text-gray-500">
             <span v-if="filteredTasks.length > 0">Found {{ filteredTasks.length }} results for "{{ searchQuery }}"</span>
             <span v-else>No results found for "{{ searchQuery }}"</span>
@@ -152,134 +138,137 @@
         </div>
 
         <!-- Sort Controls -->
-        <div v-if="!isSearching && filteredTasks.length > 1" class="mb-4">
+        <div v-if="!isSearching && filteredTasks.length > 1" class="mt-4 mb-4 px-6 flex-shrink-0">
           <SortControls />
         </div>
 
-        <!-- Empty State (shown when no tasks) -->
-        <div v-if="!isSearching && tasks.length === 0" class="flex flex-col items-center justify-center min-h-96">
-          <h2 class="text-2xl font-bold text-gray-900 mb-6">What do you have in mind?</h2>
-          <div class="w-full max-w-2xl">
-            <div class="relative">
-              <input
-                v-model="newTask"
-                @keyup.enter="addTask"
-                type="text"
-                :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
-                class="w-full px-4 py-4 pr-16 text-lg border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-              />
-              <button
-                @click="addTask"
-                :disabled="!newTask.trim() || isLoading"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                </svg>
-                <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Task List (shown when tasks exist) -->
-        <div v-else class="flex flex-col" style="height: 85vh;">
-          <!-- Loading State -->
-          <div v-if="isLoading" class="flex-1 flex items-center justify-center">
-            <div class="text-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
-              <p class="text-gray-600">Loading tasks...</p>
-            </div>
-          </div>
-          
-          <!-- Task Items Container -->
-          <div v-else-if="filteredTasks.length > 0" class="flex-1 overflow-y-auto space-y-3" style="width: 80%; margin: 0 auto;">
-            <DraggableTaskList @delete-task="confirmDelete" />
-          </div>
-
-          <!-- No tasks for today message, you the template "What do you have in mind?" -->
-          <div v-else-if="!isSearching && tasks.length > 0 && filteredTasks.length === 0 && selectedDateFilter === 'today'" class="flex flex-col items-center justify-center min-h-96">
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto px-6 scrollbar-hide">
+          <!-- Empty State (shown when no tasks) -->
+          <div v-if="!isSearching && tasks.length === 0" class="flex flex-col items-center justify-center min-h-96">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">What do you have in mind?</h2>
             <div class="w-full max-w-2xl">
-              <div class="relative">
-                <input
-                  v-model="newTask"
-                  @keyup.enter="addTask"
-                  type="text"
-                  :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
-                  class="w-full px-4 py-4 pr-16 text-lg border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-                />
-                <button
-                  @click="addTask"
-                  :disabled="!newTask.trim() || isLoading"
-                  class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                <div class="relative">
+                  <textarea
+                    v-model="newTask"
+                    @keyup.enter="addTask"
+                    :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
+                    class="w-full px-4 py-4 pr-16 text-sm border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent resize-none"
+                    rows="4"
+                  ></textarea>
+                  <button
+                    @click="addTask"
+                    :disabled="!newTask.trim() || isLoading"
+                    class="absolute bottom-4 right-2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                    </svg>
+                    <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  </button>
+                </div>
+              </div>
+          </div>
+
+          <!-- Task List (shown when tasks exist) -->
+          <div v-else class="flex flex-col h-full">
+            <!-- Loading State -->
+            <div v-if="isLoading" class="h-full flex items-center justify-center overflow-y-auto scrollbar-hide">
+              <div class="text-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-200 mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading tasks...</p>
+              </div>
+            </div>
+            
+            <!-- Task Items Container -->
+            <div v-else-if="filteredTasks.length > 0" class="space-y-3 overflow-y-auto h-full scrollbar-hide" style="width: 80%; margin: 20px auto 0 auto;">
+              <DraggableTaskList @delete-task="confirmDelete" />
+            </div>
+
+            <!-- No tasks for today message, you the template "What do you have in mind?" -->
+            <div v-else-if="!isSearching && tasks.length > 0 && filteredTasks.length === 0 && selectedDateFilter === 'today'" class="flex flex-col items-center justify-center min-h-96">
+              <h2 class="text-2xl font-bold text-gray-900 mb-6">What do you have in mind?</h2>
+              <div class="w-full max-w-2xl">
+                <div class="relative">
+                  <textarea
+                    v-model="newTask"
+                    @keyup.enter="addTask"
+                    :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
+                    class="w-full px-4 py-4 pr-16 text-sm border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent resize-none"
+                    rows="4"
+                  ></textarea>
+                  <button
+                    @click="addTask"
+                    :disabled="!newTask.trim() || isLoading"
+                    class="absolute bottom-4 right-2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                    </svg>
+                    <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- No tasks for selected date message -->
+            <div v-else-if="!isSearching && tasks.length > 0 && filteredTasks.length === 0" class="h-full flex items-center justify-center overflow-y-auto scrollbar-hide">
+              <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                   </svg>
-                  <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No tasks for this date</h3>
+                <p class="text-gray-500 mb-4">
+                  <span v-if="selectedDateFilter === 'today'">You don't have any tasks for today.</span>
+                  <span v-else-if="selectedDateFilter === 'yesterday'">You don't have any tasks for yesterday.</span>
+                  <span v-else-if="selectedDateFilter === 'dayBeforeYesterday'">You don't have any tasks for {{ formatDateForDisplay(dayBeforeYesterday) }}.</span>
+                  <span v-else-if="selectedDateFilter === 'specific'">You don't have any tasks for {{ formatDateForDisplay(selectedSpecificDate) }}.</span>
+                  <span v-else>You don't have any tasks for the selected date.</span>
+                </p>
+                <button 
+                  @click="selectDateFilter('today')"
+                  class="inline-flex items-center px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                  View Today's Tasks
                 </button>
               </div>
             </div>
-          </div>
 
-          <!-- No tasks for selected date message -->
-          <div v-else-if="!isSearching && tasks.length > 0 && filteredTasks.length === 0" class="flex-1 flex items-center justify-center">
-            <div class="text-center">
-              <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
+            <!-- No search results message -->
+            <div v-else-if="isSearching" class="h-full flex items-center justify-center overflow-y-auto scrollbar-hide">
+              <div class="text-center">
+                <p class="text-gray-500">No tasks match your search</p>
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No tasks for this date</h3>
-              <p class="text-gray-500 mb-4">
-                <span v-if="selectedDateFilter === 'today'">You don't have any tasks for today.</span>
-                <span v-else-if="selectedDateFilter === 'yesterday'">You don't have any tasks for yesterday.</span>
-                <span v-else-if="selectedDateFilter === 'dayBeforeYesterday'">You don't have any tasks for {{ formatDateForDisplay(dayBeforeYesterday) }}.</span>
-                <span v-else-if="selectedDateFilter === 'specific'">You don't have any tasks for {{ formatDateForDisplay(selectedSpecificDate) }}.</span>
-                <span v-else>You don't have any tasks for the selected date.</span>
-              </p>
-              <button 
-                @click="selectDateFilter('today')"
-                class="inline-flex items-center px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                View Today's Tasks
-              </button>
             </div>
-          </div>
 
-          <!-- No search results message -->
-          <div v-else-if="isSearching" class="flex-1 flex items-center justify-center">
-            <div class="text-center">
-              <p class="text-gray-500">No tasks match your search</p>
-            </div>
-          </div>
-
-          <!-- Hide this input when selectedDateFilter is 'today' -->
-          <div v-if="selectedDateFilter !== 'today'" class="block">
-            <!-- Add New Task Input (fixed at bottom) -->
-            <div class="p-6 bg-white" style="width: 80%; margin: 0 auto;">
-              <div class="relative">
-                <input
-                  v-model="newTask"
-                  @keyup.enter="addTask"
-                  type="text"
-                  :placeholder="`What else do you need to do ${getPlaceholderText()}?`"
-                  class="w-full px-4 py-3 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-                />
-                <button
-                  @click="addTask"
-                  :disabled="!newTask.trim() || isLoading"
-                  class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                  </svg>
-                  <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                </button>
+            <!-- Hide this input when selectedDateFilter is 'today' -->
+            <div v-if="selectedDateFilter !== 'today'" class="block">
+              <!-- Add New Task Input (fixed at bottom) -->
+              <div class="pt-6 pb-6 bg-white" style="width: 80%; margin: 0 auto;">
+                <div class="relative">
+                  <input
+                    v-model="newTask"
+                    @keyup.enter="addTask"
+                    type="text"
+                    :placeholder="`What else do you need to do ${getPlaceholderText()}?`"
+                    class="w-full px-4 py-3 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent text-sm"
+                  />
+                  <button
+                    @click="addTask"
+                    :disabled="!newTask.trim() || isLoading"
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                    </svg>
+                    <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -486,6 +475,21 @@ const formatDateForDisplay = (dateString) => {
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
   const monthDay = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
   return `${dayName}, ${monthDay}`
+}
+
+const getWeekNumber = (dateString) => {
+  const date = new Date(dateString)
+  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+  
+  // Calculate which week of the month this date falls into
+  // Week 1: 1st-7th, Week 2: 8th-14th, Week 3: 15th-21st, Week 4: 22nd-28th, Week 5: 29th+
+  const dayOfMonth = date.getDate()
+  const weekNumber = Math.ceil(dayOfMonth / 7)
+  
+  // Add ordinal suffix (1st, 2nd, 3rd, 4th, 5th, etc.)
+  const suffixes = ['th', 'st', 'nd', 'rd']
+  const v = weekNumber % 100
+  return weekNumber + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0])
 }
 
 const getPlaceholderText = () => {

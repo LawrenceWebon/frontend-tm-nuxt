@@ -1,5 +1,4 @@
 declare global {
-  const definePageMeta: typeof import('nuxt/app')['definePageMeta']
   const useRouter: typeof import('vue-router')['useRouter']
   const useRoute: typeof import('vue-router')['useRoute']
   const navigateTo: typeof import('nuxt/app')['navigateTo']

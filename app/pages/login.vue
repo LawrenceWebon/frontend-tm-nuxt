@@ -1,16 +1,16 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-white">
     <!-- Content -->
-    <div class="w-full max-w-md px-6">
+    <div class="px-6 w-[32rem]">
       <!-- Logo -->
       <div class="flex justify-center mb-6">
-        <div class="w-16 h-16 flex items-center justify-center">
+        <div class="w-12 h-12 flex items-center justify-center">
           <img :src="logoUrl" alt="Logo">
         </div>
       </div>
 
       <!-- Login Card -->
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm px-16 pb-24 pt-8">
         <!-- Title -->
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-black mb-2">Sign In</h1>
@@ -37,7 +37,7 @@
         <form @submit.prevent="handleLogin" class="space-y-6" novalidate>
           <!-- Email Field -->
           <div>
-            <label for="email" class="block text-sm font-medium text-black mb-2">
+            <label for="email" class="block text-sm text-black mb-2">
               Email
             </label>
             <input
@@ -47,7 +47,7 @@
               required
               autocomplete="email"
               :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
+                'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
                 emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               ]"
               placeholder=""
@@ -62,7 +62,7 @@
           <!-- Password Field -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label for="password" class="block text-sm font-medium text-black">
+              <label for="password" class="block text-sm text-black">
                 Password
               </label>
               <button
@@ -80,7 +80,7 @@
               required
               autocomplete="current-password"
               :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
+                'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
                 passwordError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               ]"
               placeholder=""
@@ -96,7 +96,7 @@
           <button
             type="submit"
             :disabled="isLoading || !isFormValid"
-            class="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            class="w-full bg-black text-white py-2 px-1 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm"
           >
             <svg
               v-if="isLoading"
@@ -123,14 +123,14 @@
           </button>
         </form>
         <!-- Register Link -->
-        <div class="mt-6 text-center">
+        <!-- <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
             Don't have an account?
             <NuxtLink to="/register" class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline">
               Sign up here
             </NuxtLink>
           </p>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
