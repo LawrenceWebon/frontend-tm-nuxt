@@ -11,15 +11,13 @@ export interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
-  lastActivity: number
 }
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
     token: null,
-    isAuthenticated: false,
-    lastActivity: Date.now()
+    isAuthenticated: false
   }),
 
   getters: {
@@ -224,88 +222,52 @@ export const useAuthStore = defineStore('auth', {
         this.token = token
         this.user = JSON.parse(userData)
         this.isAuthenticated = true
-        this.lastActivity = Date.now()
-      }
-    },
-
-    // Update last activity timestamp and refresh token
-    async updateActivity() {
-      this.lastActivity = Date.now()
-      
-      // Refresh token if user is authenticated and token is close to expiring
-      if (this.isAuthenticated && this.token) {
-        const timeUntilLogout = this.getTimeUntilLogout()
-        const fiveMinutes = 5 * 60 * 1000 // 5 minutes in milliseconds
         
-        // Refresh token if less than 5 minutes remaining
-        if (timeUntilLogout < fiveMinutes) {
-          await this.refreshToken()
-        }
+        // Check if token is expired
+        this.checkTokenExpiration()
       }
     },
 
-    // Refresh authentication token
-    async refreshToken() {
-      if (!this.token) return false
-      
-      try {
-        const response = await fetch('http://localhost/api/refresh-token', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': window.location.origin
-          },
-          credentials: 'include'
-        })
+    // Check if token is expired and handle accordingly
+    checkTokenExpiration() {
+      if (!this.token || !this.isAuthenticated) {
+        return
+      }
 
-        if (response.ok) {
-          const data = await response.json()
-          this.token = data.token
-          this.user = data.user
-          this.lastActivity = Date.now()
+      try {
+        // Decode JWT token to check expiration
+        const tokenParts = this.token.split('.')
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]))
+          const currentTime = Math.floor(Date.now() / 1000)
           
-          // Update localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('auth_token', data.token)
-            localStorage.setItem('auth_user', JSON.stringify(data.user))
+          // If token is expired or expires within 5 minutes, refresh it
+          if (payload.exp && (payload.exp <= currentTime || payload.exp <= currentTime + 300)) {
+            console.log('Token expired or expiring soon, refreshing...')
+            this.refreshTokenIfNeeded()
           }
-          
-          return true
+        }
+      } catch (error) {
+        console.error('Error checking token expiration:', error)
+        // If we can't decode the token, assume it's invalid
+        this.logout()
+      }
+    },
+
+    // Refresh token if needed
+    async refreshTokenIfNeeded() {
+      try {
+        const { refreshToken } = useApi()
+        const success = await refreshToken()
+        
+        if (!success) {
+          // Refresh failed, logout user
+          this.logout()
         }
       } catch (error) {
         console.error('Token refresh failed:', error)
+        this.logout()
       }
-      
-      return false
-    },
-
-    // Check if user should be logged out due to inactivity
-    checkInactivity() {
-      if (!this.isAuthenticated) return false
-      
-      const INACTIVITY_TIMEOUT = 10 * 60 * 1000 // 10 minutes
-      const timeSinceActivity = Date.now() - this.lastActivity
-      
-      return timeSinceActivity >= INACTIVITY_TIMEOUT
-    },
-
-    // Get time until auto-logout
-    getTimeUntilLogout() {
-      if (!this.isAuthenticated) return 0
-      
-      const INACTIVITY_TIMEOUT = 10 * 60 * 1000 // 10 minutes
-      const timeSinceActivity = Date.now() - this.lastActivity
-      const timeUntilLogout = INACTIVITY_TIMEOUT - timeSinceActivity
-      
-      return Math.max(0, timeUntilLogout)
-    },
-
-    // Get minutes until auto-logout
-    getMinutesUntilLogout() {
-      const milliseconds = this.getTimeUntilLogout()
-      return Math.ceil(milliseconds / (1000 * 60))
     }
   }
 })

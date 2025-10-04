@@ -87,7 +87,7 @@ export function useApi() {
     try {
       const csrfToken = await getCsrfToken()
       
-      const response = await fetch(`${baseURL}/refresh`, {
+      const response = await fetch(`${baseURL}/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

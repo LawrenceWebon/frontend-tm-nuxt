@@ -14,13 +14,6 @@
         <SearchBar />
       </div>
 
-      <!-- Auto-logout Warning -->
-      <div v-if="showLogoutWarning" class="mr-4 px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full flex items-center">
-        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-        </svg>
-        Auto-logout in {{ minutesUntilLogout }} min
-      </div>
 
       <!-- Refresh Button -->
       <!-- <button
@@ -377,32 +370,9 @@ const selectedDateFilter = ref('today')
 const selectedSpecificDate = ref('')
 
 
-// Auto-logout functionality
-const { startAutoLogout, stopAutoLogout, getMinutesUntilLogout } = useAutoLogout()
+// Auth store
 const authStore = useAuthStore()
 
-// Auto-logout countdown
-const minutesUntilLogout = ref(10)
-const showLogoutWarning = ref(false)
-
-// Update countdown every minute
-const updateCountdown = () => {
-  if (isAuthenticated.value) {
-    const minutes = authStore.getMinutesUntilLogout()
-    minutesUntilLogout.value = minutes
-    
-    // Show warning when 1 minute or less
-    showLogoutWarning.value = minutes <= 1 && minutes > 0
-  }
-}
-
-// Activity detection
-const handleActivity = () => {
-  if (isAuthenticated.value) {
-    authStore.updateActivity()
-    updateCountdown()
-  }
-}
 
 // Task management
 const newTask = ref('')
@@ -694,22 +664,19 @@ onMounted(async () => {
   document.addEventListener('click', closeDropdown)
   document.addEventListener('keydown', handleKeydown)
   
-  // Start auto-logout system
+  // Set up periodic token expiration check
   if (isAuthenticated.value) {
-    startAutoLogout()
-    updateCountdown()
-    
-    // Set up activity detection
-    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'keydown']
-    activityEvents.forEach(event => {
-      document.addEventListener(event, handleActivity, true)
-    })
-    
-    // Update countdown every minute
-    const countdownInterval = setInterval(updateCountdown, 60000)
+    // Check token expiration every 5 minutes
+    const tokenCheckInterval = setInterval(() => {
+      if (isAuthenticated.value) {
+        authStore.checkTokenExpiration()
+      } else {
+        clearInterval(tokenCheckInterval)
+      }
+    }, 5 * 60 * 1000) // 5 minutes
     
     // Store interval ID for cleanup
-    window.countdownInterval = countdownInterval
+    window.tokenCheckInterval = tokenCheckInterval
   }
 })
 
@@ -718,19 +685,10 @@ onUnmounted(() => {
   document.removeEventListener('click', closeDropdown)
   document.removeEventListener('keydown', handleKeydown)
   
-  // Stop auto-logout system
-  stopAutoLogout()
-  
-  // Clear countdown interval
-  if (window.countdownInterval) {
-    clearInterval(window.countdownInterval)
+  // Clear token check interval
+  if (window.tokenCheckInterval) {
+    clearInterval(window.tokenCheckInterval)
   }
-  
-  // Remove activity detection
-  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'keydown']
-  activityEvents.forEach(event => {
-    document.removeEventListener(event, handleActivity, true)
-  })
 })
 
 // Page meta
