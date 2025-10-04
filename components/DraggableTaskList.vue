@@ -38,7 +38,7 @@ import { useNotification } from '../composables/useNotification'
 import type { Task } from '~/stores/task'
 
 const emit = defineEmits<{
-  'delete-task': [taskId: number]
+  'delete-task': [task: Task]
 }>()
 
 const {

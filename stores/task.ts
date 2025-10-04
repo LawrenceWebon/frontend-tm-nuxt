@@ -13,6 +13,9 @@ export interface Task {
   updated_at?: string
 }
 
+// Track tasks currently being deleted to prevent duplicates
+const deletingTaskIds = new Set<number>()
+
 export const useTaskStore = defineStore('task', {
   state: () => ({
     tasks: [] as Task[],
@@ -126,6 +129,15 @@ export const useTaskStore = defineStore('task', {
     },
 
     async deleteTask(taskId: number) {
+      // Check if this task is already being deleted
+      if (deletingTaskIds.has(taskId)) {
+        console.warn('DUPLICATE DELETE PREVENTED! Task', taskId, 'is already being deleted')
+        return
+      }
+      
+      // Mark this task as being deleted
+      deletingTaskIds.add(taskId)
+      
       this.loading = true
       this.error = null
       
@@ -135,11 +147,23 @@ export const useTaskStore = defineStore('task', {
         
         this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
       } catch (error: any) {
-        this.error = error.message || 'Failed to delete task'
-        console.error('Failed to delete task:', error)
-        throw error
+        // Handle different error cases
+        if (error.status === 404) {
+          console.log('Task not found, removing from local state')
+          this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
+        } else if (error.status === 200 && error.data?.code === 'TASK_ALREADY_DELETED') {
+          console.log('Task already deleted, removing from local state')
+          this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
+        } else {
+          // For other errors, set error state and throw
+          this.error = error.message || 'Failed to delete task'
+          console.error('Failed to delete task:', error)
+          throw error
+        }
       } finally {
         this.loading = false
+        // Remove from the set after completion (success or failure)
+        deletingTaskIds.delete(taskId)
       }
     },
 

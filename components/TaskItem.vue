@@ -22,9 +22,27 @@
     <!-- Task Text -->
     <div class="flex-1">
       <div class="flex items-center">
+        <!-- Editable Title -->
+        <div v-if="isEditing && task.status !== 'completed'" class="flex-1">
+          <input
+            ref="titleInput"
+            v-model="editingTitle"
+            @keyup.enter="saveTitle"
+            @blur="saveTitle"
+            @keyup.escape="cancelEdit"
+            class="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            :class="{ 'line-through text-gray-500': task.status === 'completed' }"
+          />
+        </div>
+        <!-- Display Title -->
         <p
-          class="text-gray-900"
-          :class="{ 'line-through text-gray-500': task.status === 'completed' }"
+          v-else
+          @click="startEdit"
+          class="text-gray-900 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+          :class="{ 
+            'line-through text-gray-500': task.status === 'completed',
+            'cursor-not-allowed': task.status === 'completed'
+          }"
         >
           {{ task.title }}
         </p>
@@ -33,16 +51,25 @@
           <div class="flex items-center ml-2">
             <div class="relative">
               <button
-                @click="togglePriorityMenu(task.id)"
-                class="flex items-center text-xs rounded-full px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                @click="task.status !== 'completed' ? togglePriorityMenu(task.id) : null"
+                :disabled="task.status === 'completed'"
+                class="flex items-center text-xs rounded-full px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
                 :class="{
                   'bg-red-100 text-red-800': task.priority === 'high',
                   'bg-yellow-100 text-yellow-800': task.priority === 'medium',
-                  'bg-green-100 text-green-800': task.priority === 'low'
+                  'bg-green-100 text-green-800': task.priority === 'low',
+                  'opacity-50 cursor-not-allowed': task.status === 'completed',
+                  'hover:opacity-80': task.status !== 'completed'
                 }"
               >
                 {{ task.priority }}
-                <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg 
+                  class="w-3 h-3 ml-1" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  :class="{ 'opacity-50': task.status === 'completed' }"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </button>
@@ -103,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useTask } from '~/composables/useTask'
 import type { Task } from '~/stores/task'
 
@@ -112,7 +139,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'delete-task': [taskId: number]
+  'delete-task': [task: Task]
 }>()
 
 const { 
@@ -124,6 +151,11 @@ const {
 // Priority menu state
 const priorityMenuOpen = ref<number | null>(null)
 
+// Title editing state
+const isEditing = ref(false)
+const editingTitle = ref('')
+const titleInput = ref<HTMLInputElement | null>(null)
+
 // Helper function to format dates
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -132,6 +164,9 @@ const formatDate = (dateString: string) => {
 
 // Priority menu actions
 const togglePriorityMenu = (taskId: number) => {
+  // Don't open menu for completed tasks
+  if (props.task.status === 'completed') return
+  
   priorityMenuOpen.value = priorityMenuOpen.value === taskId ? null : taskId
 }
 
@@ -160,6 +195,48 @@ const toggleTask = async (taskId: number) => {
 }
 
 const confirmDelete = (task: Task) => {
-  emit('delete-task', task.id)
+  emit('delete-task', task)
+}
+
+// Title editing methods
+const startEdit = () => {
+  if (props.task.status === 'completed') return
+  
+  isEditing.value = true
+  editingTitle.value = props.task.title
+  
+  nextTick(() => {
+    titleInput.value?.focus()
+    titleInput.value?.select()
+  })
+}
+
+const saveTitle = async () => {
+  if (!isEditing.value) return
+  
+  const newTitle = editingTitle.value.trim()
+  
+  // Don't save if title is empty or unchanged
+  if (!newTitle || newTitle === props.task.title) {
+    cancelEdit()
+    return
+  }
+  
+  try {
+    await updateTask(props.task.id, {
+      ...props.task,
+      title: newTitle
+    })
+    isEditing.value = false
+  } catch (error) {
+    console.error('Failed to update task title:', error)
+    alert('Failed to update task title. Please try again.')
+    cancelEdit()
+  }
+}
+
+const cancelEdit = () => {
+  isEditing.value = false
+  editingTitle.value = ''
 }
 </script>

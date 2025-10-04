@@ -102,7 +102,7 @@
             
             <!-- Last week section -->
             <div class="pt-4">
-              <div class="text-gray-400 text-xs font-medium px-3 py-1 uppercase tracking-wide">
+              <div class="text-gray-400 text-xs font-medium px-3 py-1 tracking-wide">
                 Last week
               </div>
               <div class="space-y-1 mt-2">
@@ -120,8 +120,8 @@
             
             <!-- Week before last section -->
             <div class="pt-4">
-              <div class="text-gray-400 text-xs font-medium px-3 py-1 uppercase tracking-wide">
-                Week before last
+              <div class="text-gray-400 text-xs font-medium px-3 py-1 tracking-wide">
+                3rd Week of {{ new Date(weekBeforeLastDays[0].date).toLocaleString('default', { month: 'long' }) }}
               </div>
               <div class="space-y-1 mt-2">
                 <div 
@@ -159,7 +159,7 @@
         </div>
 
         <!-- Sort Controls -->
-        <div v-if="!isSearching && filteredTasks.length > 0" class="mb-4">
+        <div v-if="!isSearching && filteredTasks.length > 1" class="mb-4">
           <SortControls />
         </div>
 
@@ -201,7 +201,33 @@
           
           <!-- Task Items Container -->
           <div v-else-if="filteredTasks.length > 0" class="flex-1 overflow-y-auto space-y-3" style="width: 80%; margin: 0 auto;">
-            <DraggableTaskList @delete-task="handleDeleteTask" />
+            <DraggableTaskList @delete-task="confirmDelete" />
+          </div>
+
+          <!-- No tasks for today message, you the template "What do you have in mind?" -->
+          <div v-else-if="!isSearching && tasks.length > 0 && filteredTasks.length === 0 && selectedDateFilter === 'today'" class="flex flex-col items-center justify-center min-h-96">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">What do you have in mind?</h2>
+            <div class="w-full max-w-2xl">
+              <div class="relative">
+                <input
+                  v-model="newTask"
+                  @keyup.enter="addTask"
+                  type="text"
+                  :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
+                  class="w-full px-4 py-4 pr-16 text-lg border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+                />
+                <button
+                  @click="addTask"
+                  :disabled="!newTask.trim() || isLoading"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                  </svg>
+                  <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- No tasks for selected date message -->
@@ -239,26 +265,29 @@
             </div>
           </div>
 
-          <!-- Add New Task Input (fixed at bottom) -->
-          <div class="p-6 bg-white" style="width: 80%; margin: 0 auto;">
-            <div class="relative">
-              <input
-                v-model="newTask"
-                @keyup.enter="addTask"
-                type="text"
-                :placeholder="`What else do you need to do ${getPlaceholderText()}?`"
-                class="w-full px-4 py-3 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-              />
-              <button
-                @click="addTask"
-                :disabled="!newTask.trim() || isLoading"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                </svg>
-                <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              </button>
+          <!-- Hide this input when selectedDateFilter is 'today' -->
+          <div v-if="selectedDateFilter !== 'today'" class="block">
+            <!-- Add New Task Input (fixed at bottom) -->
+            <div class="p-6 bg-white" style="width: 80%; margin: 0 auto;">
+              <div class="relative">
+                <input
+                  v-model="newTask"
+                  @keyup.enter="addTask"
+                  type="text"
+                  :placeholder="`What else do you need to do ${getPlaceholderText()}?`"
+                  class="w-full px-4 py-3 pr-16 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+                />
+                <button
+                  @click="addTask"
+                  :disabled="!newTask.trim() || isLoading"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg v-if="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                  </svg>
+                  <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -297,8 +326,8 @@
             Cancel
           </button>
           <button
-            @click="handleDeleteTask($event)"
-            :disabled="isDeleting"
+            @click.stop.prevent="handleDeleteTask"
+            :disabled="isDeleting || deleteInProgress"
             class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             <div v-if="isDeleting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -311,9 +340,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { useTask } from '~/composables/useTask'
+import { useTaskStore } from '~/stores/task'
 import { useRouter } from 'vue-router'
 
 // Authentication
@@ -372,6 +402,15 @@ const handleActivity = () => {
 // Task management
 const newTask = ref('')
 
+// Refresh tasks function
+const refreshTasks = async () => {
+  try {
+    await fetchTasks()
+  } catch (error) {
+    console.error('Failed to refresh tasks:', error)
+  }
+}
+
 // Helper function to format dates
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -399,13 +438,13 @@ const lastWeekDays = computed(() => {
   const days = []
   const today = new Date()
   
-  // Get last week (7 days ago to 1 day ago)
-  for (let i = 7; i >= 1; i--) {
+  // Get last week (1 day ago to 7 days ago) - most recent first
+  for (let i = 1; i <= 7; i++) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
     const dateString = date.toISOString().split('T')[0]
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
-    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const monthDay = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
     
     days.push({
       date: dateString,
@@ -420,13 +459,13 @@ const weekBeforeLastDays = computed(() => {
   const days = []
   const today = new Date()
   
-  // Get week before last (14 days ago to 8 days ago)
-  for (let i = 14; i >= 8; i--) {
+  // Get week before last (8 days ago to 14 days ago) - most recent first
+  for (let i = 8; i <= 14; i++) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
     const dateString = date.toISOString().split('T')[0]
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
-    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const monthDay = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
     
     days.push({
       date: dateString,
@@ -470,7 +509,7 @@ const selectDateFilter = (filterType, specificDate = null) => {
 const formatDateForDisplay = (dateString) => {
   const date = new Date(dateString)
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
-  const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const monthDay = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
   return `${dayName}, ${monthDay}`
 }
 
@@ -493,7 +532,7 @@ const getPlaceholderText = () => {
 const showDeleteModal = ref(false)
 const taskToDelete = ref(null)
 const isDeleting = ref(false)
-const deleteOperationId = ref(null)
+const deleteInProgress = ref(false) // Additional guard against double deletion
 
 // Profile dropdown
 const showProfileDropdown = ref(false)
@@ -565,63 +604,73 @@ const addTask = async () => {
     alert('Failed to create task. Please try again.')
   }
 }
+// Watch for changes in selectedDateFilter
+watch(selectedDateFilter, (newValue, oldValue) => {
+}, { immediate: true }) 
 
-
+// Delete task with confirmation modal
 const confirmDelete = (task) => {
+  if (isDeleting.value) return // Prevent multiple clicks
+  
   taskToDelete.value = task
-  deleteOperationId.value = Date.now() // Generate unique operation ID
   showDeleteModal.value = true
 }
 
 const cancelDelete = () => {
+  if (isDeleting.value) return // Prevent closing during deletion
+  
   showDeleteModal.value = false
   taskToDelete.value = null
-  deleteOperationId.value = null
 }
 
-const handleDeleteTask = async (event) => {
-  // Prevent default behavior and stop propagation
-  if (event) {
-    event.preventDefault()
-    event.stopPropagation()
-  }
-  
-  if (!taskToDelete.value || isDeleting.value) {
-    return
-  }
-  
-  // Check if this is a duplicate operation
-  const currentOperationId = deleteOperationId.value
-  if (!currentOperationId) {
+const handleDeleteTask = async () => {
+  // Prevent multiple deletions with multiple guards
+  if (isDeleting.value || deleteInProgress.value || !taskToDelete.value) {
     return
   }
   
   try {
     isDeleting.value = true
-    // Clear the operation ID to prevent duplicates
-    deleteOperationId.value = null
+    deleteInProgress.value = true
     
-    // Store the task ID before deletion
     const taskIdToDelete = taskToDelete.value.id
     
-    // Verify task exists in local state
+    // Verify task still exists in local state
     const taskExists = tasks.value.some(t => t.id === taskIdToDelete)
     if (!taskExists) {
-      console.warn(`Task ${taskIdToDelete} not found in local state, skipping deletion`)
       showDeleteModal.value = false
       taskToDelete.value = null
+      isDeleting.value = false
+      deleteInProgress.value = false
       return
     }
     
+    // Perform the deletion
     await deleteTask(taskIdToDelete)
     
+    // Close modal and reset state
     showDeleteModal.value = false
     taskToDelete.value = null
+    
   } catch (error) {
-    console.error('Failed to delete task:', error)
+    // If task not found on backend, remove it from local state and close modal
+    if (error.status === 404) {
+      // Remove from local state since it doesn't exist on backend
+      const taskIdToDelete = taskToDelete.value.id
+      const taskStore = useTaskStore()
+      taskStore.tasks = taskStore.tasks.filter(t => t.id !== taskIdToDelete)
+      
+      // Close modal without showing error
+      showDeleteModal.value = false
+      taskToDelete.value = null
+    } else {
+      // Show error for other types of failures
+      console.error('Failed to delete task:', error)
       alert(`Failed to delete task: ${error.message || 'Unknown error'}`)
+    }
   } finally {
     isDeleting.value = false
+    deleteInProgress.value = false
   }
 }
 
