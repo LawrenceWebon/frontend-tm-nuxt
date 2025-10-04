@@ -1,4 +1,4 @@
-import { useAuth } from '~/composables/useAuth'
+import { useAuth } from './useAuth'
 import { useRouter } from 'vue-router'
 
 export function useAutoLogout() {

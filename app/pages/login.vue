@@ -5,16 +5,16 @@
       <!-- Logo -->
       <div class="flex justify-center mb-6">
         <div class="w-16 h-16 flex items-center justify-center">
-          <img src="../assets/images/logo.png" alt="Logo">
+          <img :src="logoUrl" alt="Logo">
         </div>
       </div>
 
-      <!-- Register Card -->
+      <!-- Login Card -->
       <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
         <!-- Title -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-black mb-2">Create Account</h1>
-          <p class="text-gray-600">Sign up to start managing your tasks</p>
+          <h1 class="text-3xl font-bold text-black mb-2">Sign In</h1>
+          <p class="text-gray-600">Login to continue using this app</p>
         </div>
 
         <!-- Error Message -->
@@ -33,32 +33,8 @@
           <p class="text-green-700 text-sm">{{ successMessage }}</p>
         </div>
 
-        <!-- Register Form -->
-        <form @submit.prevent="handleRegister" class="space-y-6" novalidate>
-          <!-- Name Field -->
-          <div>
-            <label for="name" class="block text-sm font-medium text-black mb-2">
-              Full Name
-            </label>
-            <input
-              id="name"
-              v-model="form.name"
-              type="text"
-              required
-              autocomplete="name"
-              :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
-                nameError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-              ]"
-              placeholder=""
-              :disabled="isLoading"
-              @blur="validateName"
-              @input="clearFieldError('name')"
-              aria-describedby="name-error"
-            />
-            <p v-if="nameError" id="name-error" class="mt-2 text-sm text-red-600">{{ nameError }}</p>
-          </div>
-
+        <!-- Login Form -->
+        <form @submit.prevent="handleLogin" class="space-y-6" novalidate>
           <!-- Email Field -->
           <div>
             <label for="email" class="block text-sm font-medium text-black mb-2">
@@ -85,15 +61,24 @@
 
           <!-- Password Field -->
           <div>
-            <label for="password" class="block text-sm font-medium text-black mb-2">
-              Password
-            </label>
+            <div class="flex items-center justify-between mb-2">
+              <label for="password" class="block text-sm font-medium text-black">
+                Password
+              </label>
+              <button
+                type="button"
+                @click="handleForgotPassword"
+                class="text-sm text-gray-500 hover:text-gray-700 transition-colors focus:outline-none focus:underline"
+              >
+                Forgot your password?
+              </button>
+            </div>
             <input
               id="password"
               v-model="form.password"
               type="password"
               required
-              autocomplete="new-password"
+              autocomplete="current-password"
               :class="[
                 'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
                 passwordError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
@@ -107,31 +92,7 @@
             <p v-if="passwordError" id="password-error" class="mt-2 text-sm text-red-600">{{ passwordError }}</p>
           </div>
 
-          <!-- Confirm Password Field -->
-          <div>
-            <label for="passwordConfirmation" class="block text-sm font-medium text-black mb-2">
-              Confirm Password
-            </label>
-            <input
-              id="passwordConfirmation"
-              v-model="form.passwordConfirmation"
-              type="password"
-              required
-              autocomplete="new-password"
-              :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
-                passwordConfirmationError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-              ]"
-              placeholder=""
-              :disabled="isLoading"
-              @blur="validatePasswordConfirmation"
-              @input="clearFieldError('passwordConfirmation')"
-              aria-describedby="password-confirmation-error"
-            />
-            <p v-if="passwordConfirmationError" id="password-confirmation-error" class="mt-2 text-sm text-red-600">{{ passwordConfirmationError }}</p>
-          </div>
-
-          <!-- Register Button -->
+          <!-- Login Button -->
           <button
             type="submit"
             :disabled="isLoading || !isFormValid"
@@ -158,19 +119,15 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+            {{ isLoading ? 'Signing in...' : 'Login' }}
           </button>
         </form>
-
-        <!-- Login Link -->
+        <!-- Register Link -->
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
-            Already have an account?
-            <NuxtLink
-              to="/login"
-              class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline"
-            >
-              Sign in here
+            Don't have an account?
+            <NuxtLink to="/register" class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline">
+              Sign up here
             </NuxtLink>
           </p>
         </div>
@@ -181,7 +138,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useAuth } from '~/composables/useAuth'
+import { useAuth } from '../composables/useAuth'
+import logoImage from '../../assets/images/logo.svg'
 
 // Redirect if already authenticated
 definePageMeta({
@@ -189,8 +147,11 @@ definePageMeta({
   middleware: []
 })
 
-const { register, isAuthenticated, isLoading: authLoading } = useAuth()
+const { login, isAuthenticated, isLoading: authLoading } = useAuth()
 const router = useRouter()
+
+// Logo URL
+const logoUrl = computed(() => logoImage)
 
 // Redirect if already authenticated
 onMounted(() => {
@@ -201,53 +162,31 @@ onMounted(() => {
 
 // Form state
 const form = ref({
-  name: '',
   email: '',
-  password: '',
-  passwordConfirmation: ''
+  password: ''
 })
 
 // UI state
 const error = ref('')
 const successMessage = ref('')
-const nameError = ref('')
 const emailError = ref('')
 const passwordError = ref('')
-const passwordConfirmationError = ref('')
 
 // Computed properties
 const isLoading = computed(() => authLoading.value)
 const isFormValid = computed(() => {
-  return form.value.name && 
-         form.value.email && 
+  return form.value.email && 
          form.value.password && 
-         form.value.passwordConfirmation &&
-         !nameError.value && 
          !emailError.value && 
-         !passwordError.value && 
-         !passwordConfirmationError.value &&
+         !passwordError.value &&
          isValidEmail(form.value.email) &&
-         form.value.password.length >= 6 &&
-         form.value.password === form.value.passwordConfirmation
+         form.value.password.length >= 6
 })
 
 // Validation functions
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
-}
-
-const validateName = () => {
-  if (!form.value.name) {
-    nameError.value = 'Full name is required'
-    return false
-  }
-  if (form.value.name.trim().length < 2) {
-    nameError.value = 'Name must be at least 2 characters long'
-    return false
-  }
-  nameError.value = ''
-  return true
 }
 
 const validateEmail = () => {
@@ -272,40 +211,15 @@ const validatePassword = () => {
     passwordError.value = 'Password must be at least 6 characters long'
     return false
   }
-  if (form.value.passwordConfirmation && form.value.password !== form.value.passwordConfirmation) {
-    passwordConfirmationError.value = 'Passwords do not match'
-  }
   passwordError.value = ''
   return true
 }
 
-const validatePasswordConfirmation = () => {
-  if (!form.value.passwordConfirmation) {
-    passwordConfirmationError.value = 'Please confirm your password'
-    return false
-  }
-  if (form.value.password !== form.value.passwordConfirmation) {
-    passwordConfirmationError.value = 'Passwords do not match'
-    return false
-  }
-  passwordConfirmationError.value = ''
-  return true
-}
-
 const clearFieldError = (field: string) => {
-  switch (field) {
-    case 'name':
-      nameError.value = ''
-      break
-    case 'email':
-      emailError.value = ''
-      break
-    case 'password':
-      passwordError.value = ''
-      break
-    case 'passwordConfirmation':
-      passwordConfirmationError.value = ''
-      break
+  if (field === 'email') {
+    emailError.value = ''
+  } else if (field === 'password') {
+    passwordError.value = ''
   }
 }
 
@@ -314,61 +228,71 @@ const clearMessages = () => {
   successMessage.value = ''
 }
 
+// UI functions
+
+const handleForgotPassword = () => {
+  // TODO: Implement forgot password functionality
+  successMessage.value = 'Password reset functionality will be implemented soon'
+  setTimeout(() => {
+    successMessage.value = ''
+  }, 5000)
+}
+
+
 // Form submission
-const handleRegister = async () => {
+const handleLogin = async () => {
   clearMessages()
   
   // Validate form
-  const isNameValid = validateName()
   const isEmailValid = validateEmail()
   const isPasswordValid = validatePassword()
-  const isPasswordConfirmationValid = validatePasswordConfirmation()
   
-  if (!isNameValid || !isEmailValid || !isPasswordValid || !isPasswordConfirmationValid) {
+  if (!isEmailValid || !isPasswordValid) {
     return
   }
 
   try {
-    const result = await register(
-      form.value.name,
-      form.value.email,
-      form.value.password,
-      form.value.passwordConfirmation
-    )
+    const result = await login(form.value.email, form.value.password)
     
     if (result.success) {
-      successMessage.value = 'Account created successfully! Redirecting...'
+      successMessage.value = 'Login successful! Redirecting...'
+      
+      // Check for stored redirect path
+      let redirectPath = '/'
+      if (typeof window !== 'undefined') {
+        const storedRedirect = sessionStorage.getItem('auth.redirect')
+        if (storedRedirect) {
+          redirectPath = storedRedirect
+          sessionStorage.removeItem('auth.redirect')
+        }
+      }
       
       // Redirect after a short delay
       setTimeout(async () => {
-        await router.push('/')
-      }, 1500)
+        await router.push(redirectPath)
+      }, 1000)
     } else {
-      error.value = result.error || 'Registration failed'
+      error.value = result.error || 'Invalid email or password'
     }
   } catch (e) {
     error.value = 'An unexpected error occurred. Please try again.'
-    console.error('Registration error:', e)
+    console.error('Login error:', e)
   }
 }
 
 // Focus management for accessibility
 const focusFirstError = () => {
   nextTick(() => {
-    if (nameError.value) {
-      document.getElementById('name')?.focus()
-    } else if (emailError.value) {
+    if (emailError.value) {
       document.getElementById('email')?.focus()
     } else if (passwordError.value) {
       document.getElementById('password')?.focus()
-    } else if (passwordConfirmationError.value) {
-      document.getElementById('passwordConfirmation')?.focus()
     }
   })
 }
 
 // Watch for validation errors and focus management
-watch([nameError, emailError, passwordError, passwordConfirmationError], () => {
+watch([emailError, passwordError], () => {
   focusFirstError()
 })
 
@@ -390,14 +314,4 @@ watch(error, (newValue) => {
   }
 })
 </script>
-
-
-
-
-
-
-
-
-
-
 

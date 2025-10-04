@@ -1,4 +1,4 @@
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from '../../stores/auth'
 
 export interface ApiResponse<T = any> {
   data: T

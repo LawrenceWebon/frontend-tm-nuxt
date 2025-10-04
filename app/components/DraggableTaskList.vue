@@ -33,9 +33,9 @@
 import { computed, ref, watch } from 'vue'
 import draggable from 'vuedraggable'
 import { GripVertical } from 'lucide-vue-next'
-import { useTask } from '~/composables/useTask'
+import { useTask } from '../composables/useTask'
 import { useNotification } from '../composables/useNotification'
-import type { Task } from '~/stores/task'
+import type { Task } from '../../stores/task'
 
 const emit = defineEmits<{
   'delete-task': [task: Task]

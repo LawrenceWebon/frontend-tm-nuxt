@@ -5,7 +5,7 @@
       <!-- Logo -->
       <div class="flex items-center">
         <div class="w-8 h-8 rounded-sm flex items-center justify-center">
-          <img src="../assets/images/logo.png" alt="Logo">
+          <img :src="logoUrl" alt="Logo">
         </div>
       </div>
 
@@ -341,14 +341,19 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useAuth } from '~/composables/useAuth'
-import { useTask } from '~/composables/useTask'
-import { useTaskStore } from '~/stores/task'
+import { useAuth } from '../composables/useAuth'
+import { useTask } from '../composables/useTask'
+import logoImage from '../../assets/images/logo.svg'
+import { useTaskStore } from '../../stores/task'
+import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
 
 // Authentication
 const { isAuthenticated, checkAuth, user, logout } = useAuth()
 const router = useRouter()
+
+// Logo URL
+const logoUrl = computed(() => logoImage)
 
 // Task management
 const { 

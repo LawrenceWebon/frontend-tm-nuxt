@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { defineStore } from 'pinia'
-import { useApi } from '~/composables/useApi'
+import { useApi } from '../app/composables/useApi'
 
 export interface Task {
   id: number
@@ -116,6 +116,14 @@ export const useTaskStore = defineStore('task', {
           if (index !== -1) {
             this.tasks[index] = response.data
           }
+          
+          // Also update searchResults if we're in search mode
+          if (this.isSearching && this.searchResults.length > 0) {
+            const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
+            if (searchIndex !== -1) {
+              this.searchResults[searchIndex] = response.data
+            }
+          }
         }
         
         return response.data
@@ -146,14 +154,27 @@ export const useTaskStore = defineStore('task', {
         await del(`/tasks/${taskId}`)
         
         this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
+        
+        // Also remove from searchResults if we're in search mode
+        if (this.isSearching && this.searchResults.length > 0) {
+          this.searchResults = this.searchResults.filter((t: Task) => t.id !== taskId)
+        }
       } catch (error: any) {
         // Handle different error cases
         if (error.status === 404) {
           console.log('Task not found, removing from local state')
           this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
+          // Also remove from searchResults if we're in search mode
+          if (this.isSearching && this.searchResults.length > 0) {
+            this.searchResults = this.searchResults.filter((t: Task) => t.id !== taskId)
+          }
         } else if (error.status === 200 && error.data?.code === 'TASK_ALREADY_DELETED') {
           console.log('Task already deleted, removing from local state')
           this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
+          // Also remove from searchResults if we're in search mode
+          if (this.isSearching && this.searchResults.length > 0) {
+            this.searchResults = this.searchResults.filter((t: Task) => t.id !== taskId)
+          }
         } else {
           // For other errors, set error state and throw
           this.error = error.message || 'Failed to delete task'
@@ -225,6 +246,15 @@ export const useTaskStore = defineStore('task', {
             // Update the specific property to maintain reactivity
             this.tasks[index].priority = response.data.priority
             this.tasks[index].updated_at = response.data.updated_at
+          }
+          
+          // Also update searchResults if we're in search mode
+          if (this.isSearching && this.searchResults.length > 0) {
+            const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
+            if (searchIndex !== -1) {
+              this.searchResults[searchIndex].priority = response.data.priority
+              this.searchResults[searchIndex].updated_at = response.data.updated_at
+            }
           }
         }
         

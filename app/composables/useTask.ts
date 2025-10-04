@@ -1,5 +1,5 @@
-import { useTaskStore } from '~/stores/task'
-import type { Task } from '~/stores/task'
+import { useTaskStore } from '../../stores/task'
+import type { Task } from '../../stores/task'
 
 export const useTask = () => {
   const taskStore = useTaskStore()

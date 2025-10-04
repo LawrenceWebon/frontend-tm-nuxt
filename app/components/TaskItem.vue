@@ -31,7 +31,7 @@
             @blur="saveTitle"
             @keyup.escape="cancelEdit"
             class="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            :class="{ 'line-through text-gray-500': task.status === 'completed' }"
+            :class="{ 'line-through text-gray-500': isCompleted }"
           />
         </div>
         <!-- Display Title -->
@@ -131,8 +131,8 @@
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
-import { useTask } from '~/composables/useTask'
-import type { Task } from '~/stores/task'
+import { useTask } from '../composables/useTask'
+import type { Task } from '../../stores/task'
 
 const props = defineProps<{
   task: Task
@@ -147,6 +147,9 @@ const {
   updateTask, 
   updateTaskPriority 
 } = useTask()
+
+// Computed property to avoid TypeScript comparison issues
+const isCompleted = computed(() => props.task.status === 'completed')
 
 // Priority menu state
 const priorityMenuOpen = ref<number | null>(null)

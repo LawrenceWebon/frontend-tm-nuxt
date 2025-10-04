@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, Ref } from 'vue'
+import { onMounted, onUnmounted, type Ref } from 'vue'
 
 /**
  * Composable for handling click outside detection

@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
-import { useTask } from '~/composables/useTask'
+import { useTask } from '../composables/useTask'
 
 const { searchTasks, clearSearch } = useTask()
 

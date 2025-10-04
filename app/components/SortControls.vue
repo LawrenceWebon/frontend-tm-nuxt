@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTask } from '~/composables/useTask'
+import { useTask } from '../composables/useTask'
 
 const { sortBy, setSortBy } = useTask()
 </script>

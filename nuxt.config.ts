@@ -9,6 +9,12 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss'
   ],
 
+  // Alias configuration for app directory structure
+  alias: {
+    '~': '.',
+    '~/app': './app'
+  },
+
   // Runtime config for API
   runtimeConfig: {
     public: {
