@@ -237,7 +237,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         // Decode JWT token to check expiration
         const tokenParts = this.token.split('.')
-        if (tokenParts.length === 3) {
+        if (tokenParts.length === 3 && tokenParts[1]) {
           const payload = JSON.parse(atob(tokenParts[1]))
           const currentTime = Math.floor(Date.now() / 1000)
           
