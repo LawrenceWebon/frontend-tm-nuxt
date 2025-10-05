@@ -2,10 +2,10 @@
   <div class="relative">
     <label for="search-input" class="sr-only">Search tasks</label>
     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <svg 
-        class="h-5 w-5 text-gray-400" 
-        fill="none" 
-        stroke="currentColor" 
+      <svg
+        class="h-5 w-5 text-gray-400"
+        fill="none"
+        stroke="currentColor"
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
@@ -27,7 +27,7 @@
       role="searchbox"
       aria-label="Search tasks"
       aria-describedby="search-help"
-      class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-blue-500 sm:text-sm"
+      class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-200 sm:text-sm"
       @input="debouncedSearch"
       @keydown="handleKeydown"
     />

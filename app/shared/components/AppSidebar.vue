@@ -127,11 +127,11 @@ import { useDateFilter } from '../composables/useDateFilter'
 const { setCurrentDate } = useTask()
 
 // Date filtering state - now shared
-const { 
-  selectedDateFilter, 
-  selectedSpecificDate, 
-  today, 
-  yesterday, 
+const {
+  selectedDateFilter,
+  selectedSpecificDate,
+  today: _today,
+  yesterday: _yesterday,
   dayBeforeYesterday,
   setDateFilter,
   getCurrentDate,
@@ -191,7 +191,7 @@ const weekBeforeLastDays = computed(() => {
 // Date filtering methods
 const selectDateFilter = (filterType, specificDate = null) => {
   setDateFilter(filterType, specificDate || '')
-  
+
   const targetDate = getCurrentDate()
   setCurrentDate(targetDate)
 }

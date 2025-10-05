@@ -15,7 +15,7 @@
 
     <!-- Global Modals -->
     <slot name="modals" />
-    
+
     <!-- Notification Container -->
     <NotificationContainer />
   </div>

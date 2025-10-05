@@ -6,11 +6,13 @@
       ghost-class="bg-gray-100"
       @end="handleReorder"
       :disabled="isSearching"
-      :aria-label="isSearching ? 'Task list (reordering disabled during search)' : 'Draggable task list'"
+      :aria-label="
+        isSearching ? 'Task list (reordering disabled during search)' : 'Draggable task list'
+      "
     >
       <template #item="{ element }">
-        <div 
-          class="mb-2" 
+        <div
+          class="mb-2"
           :class="{ 'cursor-move': !isSearching && sortBy === 'order' }"
           :aria-label="`Task: ${element.title}, ${element.status === 'completed' ? 'completed' : 'pending'}, ${element.priority} priority`"
         >

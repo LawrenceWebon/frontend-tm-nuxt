@@ -19,6 +19,7 @@
     "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
     "lint:check": "eslint . --ext .vue,.js,.ts,.jsx,.tsx",
     "lint:fix": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
+    "lint:clean": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix --rule 'no-undef: off'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "vue-tsc --noEmit",

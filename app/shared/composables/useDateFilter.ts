@@ -20,7 +20,8 @@ export const resetDateFilterState = () => {
 export const hasDateFilterBeenReset = () => hasBeenReset
 
 // Get current state
-const { selectedDateFilter, selectedSpecificDate } = dateFilterState
+const { selectedDateFilter: _selectedDateFilter, selectedSpecificDate: _selectedSpecificDate } =
+  dateFilterState
 
 // Date computations
 const today = computed(() => {
@@ -89,12 +90,12 @@ export const useDateFilter = () => {
     // State
     selectedDateFilter: dateFilterState.selectedDateFilter,
     selectedSpecificDate: dateFilterState.selectedSpecificDate,
-    
+
     // Computed dates
     today,
     yesterday,
     dayBeforeYesterday,
-    
+
     // Functions
     setDateFilter,
     getCurrentDate,

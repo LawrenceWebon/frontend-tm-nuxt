@@ -1,26 +1,26 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <!-- Logo -->
-      <div class="flex justify-center">
-        <div class="w-12 h-12 rounded-sm flex items-center justify-center">
+      <div class="flex justify-center mb-8">
+        <div class="w-12 h-12 flex items-center justify-center">
           <img :src="logoUrl" alt="Logo" class="h-8 w-8" />
         </div>
       </div>
 
-      <!-- Page Title -->
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        <slot name="title">Welcome</slot>
-      </h2>
+      <!-- Login Card -->
+      <div class="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-100">
+        <!-- Page Title -->
+        <h2 class="text-center text-2xl font-bold text-black mb-2">
+          {{ pageTitle }}
+        </h2>
 
-      <!-- Page Subtitle -->
-      <p class="mt-2 text-center text-sm text-gray-600">
-        <slot name="subtitle">Please sign in to your account</slot>
-      </p>
-    </div>
+        <!-- Page Subtitle -->
+        <p class="text-center text-sm text-gray-600 mb-8">
+          {{ pageSubtitle }}
+        </p>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <!-- Form Content -->
         <slot />
       </div>
     </div>
@@ -33,4 +33,34 @@ import logoImage from '../../assets/images/logo.svg'
 
 // Logo URL
 const logoUrl = computed(() => logoImage)
+
+// Get current route
+const route = useRoute()
+
+// Dynamic titles based on route
+const pageTitle = computed(() => {
+  switch (route.name) {
+    case 'register':
+      return 'Sign Up'
+    case 'forgot-password':
+      return 'Forgot Password'
+    case 'reset-password':
+      return 'Reset Password'
+    default:
+      return 'Sign In'
+  }
+})
+
+const pageSubtitle = computed(() => {
+  switch (route.name) {
+    case 'register':
+      return 'Create your account to get started'
+    case 'forgot-password':
+      return 'Enter your email to receive a reset link'
+    case 'reset-password':
+      return 'Enter your new password below'
+    default:
+      return 'Login to continue using this app'
+  }
+})
 </script>

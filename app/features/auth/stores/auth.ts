@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { useApi } from '../../../shared/composables/useApi'
-import { resetDateFilterState, hasDateFilterBeenReset } from '../../../shared/composables/useDateFilter'
+import {
+  resetDateFilterState,
+  hasDateFilterBeenReset
+} from '../../../shared/composables/useDateFilter'
 
 export interface User {
   id: number
@@ -284,6 +287,78 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.error('Token refresh failed:', error)
         this.logout()
+      }
+    },
+
+    async forgotPassword(email: string) {
+      try {
+        const response = await fetch(`${this.getApiUrl()}/forgot-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({ email })
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to send reset email')
+        }
+
+        return {
+          success: true,
+          message: data.message
+        }
+      } catch (error) {
+        console.error('Forgot password error:', error)
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to send reset email'
+        }
+      }
+    },
+
+    async resetPassword(
+      email: string,
+      token: string,
+      password: string,
+      passwordConfirmation: string
+    ) {
+      try {
+        const response = await fetch(`${this.getApiUrl()}/reset-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            email,
+            token,
+            password,
+            password_confirmation: passwordConfirmation
+          })
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to reset password')
+        }
+
+        return {
+          success: true,
+          message: data.message
+        }
+      } catch (error) {
+        console.error('Reset password error:', error)
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to reset password'
+        }
       }
     }
   }

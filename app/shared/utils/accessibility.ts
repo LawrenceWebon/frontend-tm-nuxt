@@ -8,7 +8,7 @@
 export function isVisibleToScreenReader(element: HTMLElement): boolean {
   const style = window.getComputedStyle(element)
   const rect = element.getBoundingClientRect()
-  
+
   return (
     style.display !== 'none' &&
     style.visibility !== 'hidden' &&
@@ -72,20 +72,24 @@ export function validateAriaAttributes(element: HTMLElement): string[] {
 
   // Check for required ARIA attributes based on role
   const role = element.getAttribute('role')
-  
+
   if (role === 'button' && !element.getAttribute('aria-label') && !element.textContent?.trim()) {
     errors.push('Button without accessible name')
   }
-  
+
   if (role === 'link' && !element.getAttribute('aria-label') && !element.textContent?.trim()) {
     errors.push('Link without accessible name')
   }
-  
+
   if (role === 'img' && !element.getAttribute('alt') && !element.getAttribute('aria-label')) {
     errors.push('Image without alt text or aria-label')
   }
-  
-  if (role === 'textbox' && !element.getAttribute('aria-label') && !element.getAttribute('aria-labelledby')) {
+
+  if (
+    role === 'textbox' &&
+    !element.getAttribute('aria-label') &&
+    !element.getAttribute('aria-labelledby')
+  ) {
     const label = document.querySelector(`label[for="${element.id}"]`)
     if (!label) {
       errors.push('Text input without accessible name')
@@ -116,29 +120,35 @@ export function checkColorContrast(foreground: string, background: string): numb
     // This is a simplified version - use a proper library for production
     const rgb = color.match(/\d+/g)
     if (!rgb) return 0
-    
+
     const [r, g, b] = rgb.map(Number)
     const [rs, gs, bs] = [r, g, b].map(c => {
-      c = c / 255
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+      const normalized = (c ?? 0) / 255
+      return normalized <= 0.03928
+        ? normalized / 12.92
+        : Math.pow((normalized + 0.055) / 1.055, 2.4)
     })
-    
-    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs
+
+    return 0.2126 * (rs ?? 0) + 0.7152 * (gs ?? 0) + 0.0722 * (bs ?? 0)
   }
 
   const l1 = getLuminance(foreground)
   const l2 = getLuminance(background)
-  
+
   const lighter = Math.max(l1, l2)
   const darker = Math.min(l1, l2)
-  
+
   return (lighter + 0.05) / (darker + 0.05)
 }
 
 /**
  * Check if text meets WCAG contrast requirements
  */
-export function meetsWCAGContrast(foreground: string, background: string, level: 'AA' | 'AAA' = 'AA'): boolean {
+export function meetsWCAGContrast(
+  foreground: string,
+  background: string,
+  level: 'AA' | 'AAA' = 'AA'
+): boolean {
   const ratio = checkColorContrast(foreground, background)
   return level === 'AA' ? ratio >= 4.5 : ratio >= 7
 }
@@ -160,10 +170,10 @@ export function findAccessibilityIssues(container: HTMLElement = document.body):
   }
 
   const elements = container.querySelectorAll('*')
-  
+
   elements.forEach(element => {
     const htmlElement = element as HTMLElement
-    
+
     // Check for missing labels on form elements
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(htmlElement.tagName)) {
       const accessibleName = getAccessibleName(htmlElement)
@@ -171,7 +181,7 @@ export function findAccessibilityIssues(container: HTMLElement = document.body):
         issues.missingLabels.push(htmlElement)
       }
     }
-    
+
     // Check for missing alt text on images
     if (htmlElement.tagName === 'IMG') {
       const img = htmlElement as HTMLImageElement
@@ -179,13 +189,13 @@ export function findAccessibilityIssues(container: HTMLElement = document.body):
         issues.missingAltText.push(img)
       }
     }
-    
+
     // Check for invalid ARIA attributes
     const ariaErrors = validateAriaAttributes(htmlElement)
     if (ariaErrors.length > 0) {
       issues.invalidAria.push(htmlElement)
     }
-    
+
     // Check for focus issues on interactive elements
     if (['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT'].includes(htmlElement.tagName)) {
       if (!hasProperFocus(htmlElement)) {
@@ -193,7 +203,7 @@ export function findAccessibilityIssues(container: HTMLElement = document.body):
       }
     }
   })
-  
+
   return issues
 }
 
@@ -203,9 +213,9 @@ export function findAccessibilityIssues(container: HTMLElement = document.body):
 export function generateAccessibilityReport(container: HTMLElement = document.body): string {
   const issues = findAccessibilityIssues(container)
   const report = []
-  
+
   report.push('=== Accessibility Report ===\n')
-  
+
   if (issues.missingLabels.length > 0) {
     report.push(`❌ Missing Labels: ${issues.missingLabels.length} elements`)
     issues.missingLabels.forEach((el, index) => {
@@ -213,7 +223,7 @@ export function generateAccessibilityReport(container: HTMLElement = document.bo
     })
     report.push('')
   }
-  
+
   if (issues.missingAltText.length > 0) {
     report.push(`❌ Missing Alt Text: ${issues.missingAltText.length} images`)
     issues.missingAltText.forEach((img, index) => {
@@ -221,16 +231,18 @@ export function generateAccessibilityReport(container: HTMLElement = document.bo
     })
     report.push('')
   }
-  
+
   if (issues.invalidAria.length > 0) {
     report.push(`❌ Invalid ARIA: ${issues.invalidAria.length} elements`)
     issues.invalidAria.forEach((el, index) => {
       const ariaErrors = validateAriaAttributes(el)
-      report.push(`  ${index + 1}. ${el.tagName}${el.id ? `#${el.id}` : ''}: ${ariaErrors.join(', ')}`)
+      report.push(
+        `  ${index + 1}. ${el.tagName}${el.id ? `#${el.id}` : ''}: ${ariaErrors.join(', ')}`
+      )
     })
     report.push('')
   }
-  
+
   if (issues.focusIssues.length > 0) {
     report.push(`❌ Focus Issues: ${issues.focusIssues.length} elements`)
     issues.focusIssues.forEach((el, index) => {
@@ -238,11 +250,11 @@ export function generateAccessibilityReport(container: HTMLElement = document.bo
     })
     report.push('')
   }
-  
+
   if (Object.values(issues).every(arr => arr.length === 0)) {
     report.push('✅ No accessibility issues found!')
   }
-  
+
   return report.join('\n')
 }
 
@@ -253,23 +265,29 @@ export function testKeyboardNavigation(container: HTMLElement = document.body): 
   const focusableElements = container.querySelectorAll(
     'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
   )
-  
+
   let allFocusable = true
-  
+
   focusableElements.forEach(element => {
     const htmlElement = element as HTMLElement
-    if (htmlElement.tabIndex < 0 && !['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'A'].includes(htmlElement.tagName)) {
+    if (
+      htmlElement.tabIndex < 0 &&
+      !['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'A'].includes(htmlElement.tagName)
+    ) {
       allFocusable = false
     }
   })
-  
+
   return allFocusable
 }
 
 /**
  * Announce message to screen readers
  */
-export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
+export function announceToScreenReader(
+  message: string,
+  priority: 'polite' | 'assertive' = 'polite'
+): void {
   const announcement = document.createElement('div')
   announcement.setAttribute('aria-live', priority)
   announcement.setAttribute('aria-atomic', 'true')

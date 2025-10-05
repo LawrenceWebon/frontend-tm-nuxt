@@ -1,26 +1,12 @@
 <template>
   <div class="skip-links">
-    <a
-      href="#main-content"
-      class="skip-link"
-      @click="focusElement('#main-content')"
-    >
+    <a href="#main-content" class="skip-link" @click="focusElement('#main-content')">
       Skip to main content
     </a>
-    <a
-      href="#navigation"
-      class="skip-link"
-      @click="focusElement('#navigation')"
-    >
+    <a href="#navigation" class="skip-link" @click="focusElement('#navigation')">
       Skip to navigation
     </a>
-    <a
-      href="#search"
-      class="skip-link"
-      @click="focusElement('#search')"
-    >
-      Skip to search
-    </a>
+    <a href="#search" class="skip-link" @click="focusElement('#search')">Skip to search</a>
   </div>
 </template>
 

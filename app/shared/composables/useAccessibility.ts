@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 /**
  * Accessibility composable for managing focus, keyboard navigation, and ARIA attributes
@@ -22,9 +22,9 @@ export function useAccessibility() {
       '[contenteditable="true"]'
     ].join(', ')
 
-    const elements = container 
-      ? Array.from(container.querySelectorAll(selector)) as HTMLElement[]
-      : Array.from(document.querySelectorAll(selector)) as HTMLElement[]
+    const elements = container
+      ? (Array.from(container.querySelectorAll(selector)) as HTMLElement[])
+      : (Array.from(document.querySelectorAll(selector)) as HTMLElement[])
 
     return elements.filter(el => {
       const style = window.getComputedStyle(el)
@@ -41,23 +41,25 @@ export function useAccessibility() {
     currentFocusIndex.value = 0
 
     if (focusableElements.value.length > 0) {
-      focusableElements.value[0].focus()
+      focusableElements.value[0]?.focus()
     }
 
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === 'Tab') {
         event.preventDefault()
-        
+
         if (event.shiftKey) {
           // Shift + Tab - move backwards
-          currentFocusIndex.value = currentFocusIndex.value > 0 
-            ? currentFocusIndex.value - 1 
-            : focusableElements.value.length - 1
+          currentFocusIndex.value =
+            currentFocusIndex.value > 0
+              ? currentFocusIndex.value - 1
+              : focusableElements.value.length - 1
         } else {
           // Tab - move forwards
-          currentFocusIndex.value = currentFocusIndex.value < focusableElements.value.length - 1 
-            ? currentFocusIndex.value + 1 
-            : 0
+          currentFocusIndex.value =
+            currentFocusIndex.value < focusableElements.value.length - 1
+              ? currentFocusIndex.value + 1
+              : 0
         }
 
         focusableElements.value[currentFocusIndex.value]?.focus()
@@ -69,7 +71,7 @@ export function useAccessibility() {
     }
 
     container.addEventListener('keydown', handleKeydown)
-    
+
     return () => {
       container.removeEventListener('keydown', handleKeydown)
     }
@@ -99,11 +101,11 @@ export function useAccessibility() {
   const focusNext = (container?: HTMLElement) => {
     const elements = getFocusableElements(container)
     const currentIndex = elements.findIndex(el => el === document.activeElement)
-    
+
     if (currentIndex >= 0 && currentIndex < elements.length - 1) {
-      elements[currentIndex + 1].focus()
+      elements[currentIndex + 1]?.focus()
     } else if (elements.length > 0) {
-      elements[0].focus()
+      elements[0]?.focus()
     }
   }
 
@@ -113,11 +115,11 @@ export function useAccessibility() {
   const focusPrevious = (container?: HTMLElement) => {
     const elements = getFocusableElements(container)
     const currentIndex = elements.findIndex(el => el === document.activeElement)
-    
+
     if (currentIndex > 0) {
-      elements[currentIndex - 1].focus()
+      elements[currentIndex - 1]?.focus()
     } else if (elements.length > 0) {
-      elements[elements.length - 1].focus()
+      elements[elements.length - 1]?.focus()
     }
   }
 
@@ -127,7 +129,7 @@ export function useAccessibility() {
   const focusFirst = (container?: HTMLElement) => {
     const elements = getFocusableElements(container)
     if (elements.length > 0) {
-      elements[0].focus()
+      elements[0]?.focus()
     }
   }
 
@@ -137,7 +139,7 @@ export function useAccessibility() {
   const focusLast = (container?: HTMLElement) => {
     const elements = getFocusableElements(container)
     if (elements.length > 0) {
-      elements[elements.length - 1].focus()
+      elements[elements.length - 1]?.focus()
     }
   }
 
@@ -150,7 +152,7 @@ export function useAccessibility() {
     orientation: 'horizontal' | 'vertical' = 'vertical'
   ) => {
     const currentIndex = items.findIndex(item => item === document.activeElement)
-    
+
     if (currentIndex === -1) return
 
     let targetIndex = currentIndex
@@ -191,9 +193,11 @@ export function useAccessibility() {
    */
   const isVisibleToScreenReader = (element: HTMLElement): boolean => {
     const style = window.getComputedStyle(element)
-    return style.display !== 'none' && 
-           style.visibility !== 'hidden' && 
-           element.getAttribute('aria-hidden') !== 'true'
+    return (
+      style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      element.getAttribute('aria-hidden') !== 'true'
+    )
   }
 
   /**
@@ -237,19 +241,19 @@ export function useAccessibility() {
     focusPrevious,
     focusFirst,
     focusLast,
-    
+
     // Navigation
     handleArrowNavigation,
     getFocusableElements,
-    
+
     // Screen reader support
     announceToScreenReader,
     getAccessibleName,
     isVisibleToScreenReader,
-    
+
     // Utilities
     generateId,
-    
+
     // Refs
     focusableElements,
     currentFocusIndex,

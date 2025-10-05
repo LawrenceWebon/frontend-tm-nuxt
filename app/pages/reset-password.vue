@@ -35,59 +35,57 @@
       <p class="text-green-700 text-sm">{{ successMessage }}</p>
     </div>
 
-    <!-- Register Form -->
-    <form @submit.prevent="handleRegister" class="space-y-6" novalidate>
-      <!-- Name Field -->
-      <div>
-        <label for="name" class="block text-sm text-black mb-2">Full Name</label>
-        <input
-          id="name"
-          v-model="form.name"
-          type="text"
-          required
-          autocomplete="name"
-          :class="[
-            'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
-            nameError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-          ]"
-          placeholder=""
-          :disabled="isLoading"
-          @blur="validateName"
-          @input="clearFieldError('name')"
-          aria-describedby="name-error"
+    <!-- Invalid Token Message -->
+    <div
+      v-if="invalidToken"
+      class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start"
+    >
+      <svg
+        class="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+          clip-rule="evenodd"
         />
-        <p v-if="nameError" id="name-error" class="mt-2 text-sm text-red-600">
-          {{ nameError }}
+      </svg>
+      <div>
+        <p class="text-red-700 text-sm font-medium">Invalid or expired reset link</p>
+        <p class="text-red-600 text-sm mt-1">
+          This password reset link is invalid or has expired. Please request a new one.
         </p>
+        <NuxtLink
+          to="/forgot-password"
+          class="inline-block mt-2 text-sm text-red-600 hover:text-red-800 underline"
+        >
+          Request new reset link
+        </NuxtLink>
+      </div>
+    </div>
+
+    <!-- Reset Password Form -->
+    <form v-if="!invalidToken" @submit.prevent="handleResetPassword" class="space-y-6" novalidate>
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Reset your password</h1>
+        <p class="text-gray-600 text-sm">Enter your new password below.</p>
       </div>
 
-      <!-- Email Field -->
-      <div>
-        <label for="email" class="block text-sm text-black mb-2">Email</label>
+      <!-- Email Field (hidden, populated from URL) -->
+      <div v-if="form.email">
+        <label class="block text-sm text-gray-600 mb-2">Email</label>
         <input
-          id="email"
-          v-model="form.email"
           type="email"
-          required
-          autocomplete="email"
-          :class="[
-            'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
-            emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-          ]"
-          placeholder=""
-          :disabled="isLoading"
-          @blur="validateEmail"
-          @input="clearFieldError('email')"
-          aria-describedby="email-error"
+          :value="form.email"
+          disabled
+          class="w-full px-3 py-1.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-600 text-sm"
         />
-        <p v-if="emailError" id="email-error" class="mt-2 text-sm text-red-600">
-          {{ emailError }}
-        </p>
       </div>
 
       <!-- Password Field -->
       <div>
-        <label for="password" class="block text-sm text-black mb-2">Password</label>
+        <label for="password" class="block text-sm text-black mb-2">New Password</label>
         <input
           id="password"
           v-model="form.password"
@@ -98,7 +96,7 @@
             'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
             passwordError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
           ]"
-          placeholder=""
+          placeholder="Enter your new password"
           :disabled="isLoading"
           @blur="validatePassword"
           @input="clearFieldError('password')"
@@ -111,11 +109,11 @@
 
       <!-- Confirm Password Field -->
       <div>
-        <label for="passwordConfirmation" class="block text-sm text-black mb-2">
-          Confirm Password
+        <label for="password_confirmation" class="block text-sm text-black mb-2">
+          Confirm New Password
         </label>
         <input
-          id="passwordConfirmation"
+          id="password_confirmation"
           v-model="form.passwordConfirmation"
           type="password"
           required
@@ -124,7 +122,7 @@
             'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
             passwordConfirmationError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
           ]"
-          placeholder=""
+          placeholder="Confirm your new password"
           :disabled="isLoading"
           @blur="validatePasswordConfirmation"
           @input="clearFieldError('passwordConfirmation')"
@@ -139,7 +137,7 @@
         </p>
       </div>
 
-      <!-- Register Button -->
+      <!-- Submit Button -->
       <button
         type="submit"
         :disabled="isLoading || !isFormValid"
@@ -166,14 +164,14 @@
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+        {{ isLoading ? 'Resetting...' : 'Reset Password' }}
       </button>
     </form>
 
-    <!-- Login Link -->
+    <!-- Back to Login Link -->
     <div class="mt-6 text-center">
       <p class="text-sm text-gray-600">
-        Already have an account?
+        Remember your password?
         <NuxtLink
           to="/login"
           class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline"
@@ -188,6 +186,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useAuth } from '../features/auth/composables/useAuth'
+import { useRoute, useRouter } from 'vue-router'
 
 // Redirect if already authenticated
 definePageMeta({
@@ -195,21 +194,14 @@ definePageMeta({
   middleware: []
 })
 
-
-const { register, isAuthenticated, isLoading: authLoading } = useAuth()
+const { resetPassword, isAuthenticated, isLoading: authLoading } = useAuth()
 const router = useRouter()
-
-// Redirect if already authenticated
-onMounted(() => {
-  if (isAuthenticated.value) {
-    router.push('/')
-  }
-})
+const route = useRoute()
 
 // Form state
 const form = ref({
-  name: '',
   email: '',
+  token: '',
   password: '',
   passwordConfirmation: ''
 })
@@ -217,8 +209,7 @@ const form = ref({
 // UI state
 const error = ref('')
 const successMessage = ref('')
-const nameError = ref('')
-const emailError = ref('')
+const invalidToken = ref(false)
 const passwordError = ref('')
 const passwordConfirmationError = ref('')
 
@@ -226,50 +217,20 @@ const passwordConfirmationError = ref('')
 const isLoading = computed(() => authLoading.value)
 const isFormValid = computed(() => {
   return (
-    form.value.name &&
     form.value.email &&
+    form.value.token &&
     form.value.password &&
     form.value.passwordConfirmation &&
-    !nameError.value &&
-    !emailError.value &&
     !passwordError.value &&
     !passwordConfirmationError.value &&
-    isValidEmail(form.value.email) &&
-    form.value.password.length >= 6 &&
+    isValidPassword(form.value.password) &&
     form.value.password === form.value.passwordConfirmation
   )
 })
 
 // Validation functions
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-const validateName = () => {
-  if (!form.value.name) {
-    nameError.value = 'Full name is required'
-    return false
-  }
-  if (form.value.name.trim().length < 2) {
-    nameError.value = 'Name must be at least 2 characters long'
-    return false
-  }
-  nameError.value = ''
-  return true
-}
-
-const validateEmail = () => {
-  if (!form.value.email) {
-    emailError.value = 'Email address is required'
-    return false
-  }
-  if (!isValidEmail(form.value.email)) {
-    emailError.value = 'Please enter a valid email address'
-    return false
-  }
-  emailError.value = ''
-  return true
+const isValidPassword = (password: string): boolean => {
+  return password.length >= 6
 }
 
 const validatePassword = () => {
@@ -277,12 +238,9 @@ const validatePassword = () => {
     passwordError.value = 'Password is required'
     return false
   }
-  if (form.value.password.length < 6) {
+  if (!isValidPassword(form.value.password)) {
     passwordError.value = 'Password must be at least 6 characters long'
     return false
-  }
-  if (form.value.passwordConfirmation && form.value.password !== form.value.passwordConfirmation) {
-    passwordConfirmationError.value = 'Passwords do not match'
   }
   passwordError.value = ''
   return true
@@ -290,7 +248,7 @@ const validatePassword = () => {
 
 const validatePasswordConfirmation = () => {
   if (!form.value.passwordConfirmation) {
-    passwordConfirmationError.value = 'Please confirm your password'
+    passwordConfirmationError.value = 'Password confirmation is required'
     return false
   }
   if (form.value.password !== form.value.passwordConfirmation) {
@@ -302,19 +260,10 @@ const validatePasswordConfirmation = () => {
 }
 
 const clearFieldError = (field: string) => {
-  switch (field) {
-    case 'name':
-      nameError.value = ''
-      break
-    case 'email':
-      emailError.value = ''
-      break
-    case 'password':
-      passwordError.value = ''
-      break
-    case 'passwordConfirmation':
-      passwordConfirmationError.value = ''
-      break
+  if (field === 'password') {
+    passwordError.value = ''
+  } else if (field === 'passwordConfirmation') {
+    passwordConfirmationError.value = ''
   }
 }
 
@@ -323,61 +272,85 @@ const clearMessages = () => {
   successMessage.value = ''
 }
 
+// Initialize form from URL parameters
+onMounted(() => {
+  // Redirect if already authenticated
+  if (isAuthenticated.value) {
+    router.push('/')
+    return
+  }
+
+  // Get token and email from URL parameters
+  const token = route.query.token as string
+  const email = route.query.email as string
+
+  if (!token || !email) {
+    invalidToken.value = true
+    return
+  }
+
+  form.value.token = token
+  form.value.email = email
+})
+
 // Form submission
-const handleRegister = async () => {
+const handleResetPassword = async () => {
   clearMessages()
 
   // Validate form
-  const isNameValid = validateName()
-  const isEmailValid = validateEmail()
   const isPasswordValid = validatePassword()
   const isPasswordConfirmationValid = validatePasswordConfirmation()
 
-  if (!isNameValid || !isEmailValid || !isPasswordValid || !isPasswordConfirmationValid) {
+  if (!isPasswordValid || !isPasswordConfirmationValid) {
     return
   }
 
   try {
-    const result = await register(
-      form.value.name,
+    const result = await resetPassword(
+      form.value.token,
       form.value.email,
       form.value.password,
       form.value.passwordConfirmation
     )
 
     if (result.success) {
-      successMessage.value = 'Account created successfully! Redirecting...'
+      successMessage.value =
+        result.message || 'Password reset successfully! Redirecting to login...'
 
-      // Redirect after a short delay
-      setTimeout(async () => {
-        await router.push('/')
-      }, 1500)
+      // Clear the form
+      form.value.password = ''
+      form.value.passwordConfirmation = ''
+
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        router.push('/login')
+      }, 3000)
     } else {
-      error.value = result.error || 'Registration failed'
+      if (result.error?.includes('Invalid or expired')) {
+        invalidToken.value = true
+      } else {
+        error.value = result.error || 'Failed to reset password'
+      }
     }
   } catch (e) {
     error.value = 'An unexpected error occurred. Please try again.'
-    console.error('Registration error:', e)
+    console.error('Reset password error:', e)
   }
 }
 
 // Focus management for accessibility
 const focusFirstError = () => {
   nextTick(() => {
-    if (nameError.value) {
-      document.getElementById('name')?.focus()
-    } else if (emailError.value) {
-      document.getElementById('email')?.focus()
-    } else if (passwordError.value) {
+    if (passwordError.value) {
       document.getElementById('password')?.focus()
     } else if (passwordConfirmationError.value) {
-      document.getElementById('passwordConfirmation')?.focus()
+      document.getElementById('password_confirmation')?.focus()
     }
   })
 }
 
 // Watch for validation errors and focus management
-watch([nameError, emailError, passwordError, passwordConfirmationError], () => {
+watch([passwordError, passwordConfirmationError], () => {
   focusFirstError()
 })
 
@@ -386,7 +359,7 @@ watch(successMessage, newValue => {
   if (newValue) {
     setTimeout(() => {
       successMessage.value = ''
-    }, 5000)
+    }, 10000)
   }
 })
 

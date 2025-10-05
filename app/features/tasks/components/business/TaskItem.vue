@@ -48,7 +48,7 @@
             @keyup.escape="cancelEdit"
             type="text"
             aria-label="Edit task title"
-            class="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-blue-500 text-sm"
+            class="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-200 text-sm"
           />
         </div>
         <!-- Display Title -->
@@ -75,7 +75,9 @@
               <button
                 @click="task.status !== 'completed' ? togglePriorityMenu(task.id) : null"
                 @keydown.enter="task.status !== 'completed' ? togglePriorityMenu(task.id) : null"
-                @keydown.space.prevent="task.status !== 'completed' ? togglePriorityMenu(task.id) : null"
+                @keydown.space.prevent="
+                  task.status !== 'completed' ? togglePriorityMenu(task.id) : null
+                "
                 :disabled="task.status === 'completed'"
                 type="button"
                 :aria-label="`Change priority from ${task.priority}`"

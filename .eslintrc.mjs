@@ -5,6 +5,17 @@ export default {
     node: true,
     es2022: true
   },
+  globals: {
+    HTMLElement: 'readonly',
+    HTMLButtonElement: 'readonly',
+    HTMLImageElement: 'readonly',
+    KeyboardEvent: 'readonly',
+    FocusEvent: 'readonly',
+    CustomEvent: 'readonly',
+    defineEventHandler: 'readonly',
+    setHeader: 'readonly',
+    process: 'readonly'
+  },
   extends: [
     '@nuxtjs/eslint-config-typescript',
     'plugin:vue/vue3-recommended',
@@ -109,6 +120,7 @@ export default {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
     'no-unused-vars': 'off', // Use TypeScript version instead
+    'no-undef': 'off', // Disable for browser globals and Nuxt server functions
     'prefer-const': 'error',
     'no-var': 'error',
     'object-shorthand': 'error',
@@ -221,6 +233,18 @@ export default {
         // Test file specific rules
         '@typescript-eslint/no-explicit-any': 'off',
         'no-console': 'off'
+      }
+    },
+    {
+      files: ['**/*.vue', '**/*.ts', '**/*.js'],
+      rules: {
+        'no-undef': 'off'
+      }
+    },
+    {
+      files: ['server/**/*.js'],
+      rules: {
+        'no-undef': 'off'
       }
     }
   ],

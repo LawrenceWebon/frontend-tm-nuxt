@@ -52,7 +52,7 @@
               @keyup.enter="addTask"
               :placeholder="`Write the task you plan to do ${getPlaceholderText()} here...`"
               aria-label="New task description"
-              class="w-full px-4 py-4 pr-16 text-sm border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-blue-500 resize-none"
+              class="w-full px-4 py-4 pr-16 text-sm border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-200 resize-none"
               rows="4"
             ></textarea>
             <button
@@ -79,7 +79,11 @@
                   d="M5 10l7-7m0 0l7 7m-7-7v18"
                 />
               </svg>
-              <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" aria-hidden="true"></div>
+              <div
+                v-else
+                class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+                aria-hidden="true"
+              ></div>
             </button>
           </div>
         </div>
@@ -312,7 +316,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAuth } from '../features/auth/composables/useAuth'
 import { useTask } from '../features/tasks/composables/useTask'
 import { useTaskStore } from '../features/tasks/stores/task'
@@ -343,7 +347,8 @@ const {
 } = useTask()
 
 // Date filtering state - now shared with sidebar
-const { selectedDateFilter, selectedSpecificDate, formatDateForDisplay, getPlaceholderText } = useDateFilter()
+const { selectedDateFilter, selectedSpecificDate, formatDateForDisplay, getPlaceholderText } =
+  useDateFilter()
 
 // Auth store
 const authStore = useAuthStore()

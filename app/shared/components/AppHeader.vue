@@ -57,7 +57,13 @@
           aria-label="Logout from account"
           class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-inset"
         >
-          <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            class="w-4 h-4 mr-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"

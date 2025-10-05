@@ -18,14 +18,7 @@
   >
     <span v-if="loading" class="loading-spinner" aria-hidden="true">
       <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        />
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
           fill="currentColor"
@@ -33,17 +26,17 @@
         />
       </svg>
     </span>
-    
+
     <span v-if="icon && !loading" class="icon" aria-hidden="true">
       <slot name="icon">
         <component :is="icon" />
       </slot>
     </span>
-    
+
     <span v-if="$slots.default" class="content">
       <slot />
     </span>
-    
+
     <span v-if="loading" class="sr-only">Loading...</span>
   </component>
 </template>
@@ -158,11 +151,11 @@ const buttonClasses = computed(() => {
 
   // Additional classes
   const additionalClasses = []
-  
+
   if (props.fullWidth) {
     additionalClasses.push('w-full')
   }
-  
+
   if (props.rounded) {
     additionalClasses.push('rounded-full')
   } else {
