@@ -50,7 +50,7 @@
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
       <aside class="w-64 bg-white flex flex-col">
-        <nav class="p-4 overflow-y-auto flex-1 scrollbar-hide">
+        <nav class="p-4 overflow-y-auto flex-1 scrollbar-hide" @scroll="handleSidebarScroll">
           <div class="space-y-1">
             <!-- Today (Active) -->
             <div 
@@ -112,6 +112,36 @@
                 >
                   {{ day.display }}
                 </div>
+              </div>
+            </div>
+
+            <!-- Additional weeks sections -->
+            <div 
+              v-for="(week, weekIndex) in additionalWeeks" 
+              :key="`week-${weekIndex}`"
+              class="pt-4"
+            >
+              <div class="text-gray-400 text-xs font-medium px-3 py-1 tracking-wide">
+                {{ week.weekNumber }} Week of {{ week.monthName }}
+              </div>
+              <div class="space-y-1 mt-2">
+                <div 
+                  v-for="(day, dayIndex) in week.days" 
+                  :key="`${weekIndex}-${dayIndex}`"
+                  @click="selectDateFilter('specific', day.date)"
+                  class="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
+                  :class="selectedDateFilter === 'specific' && selectedSpecificDate === day.date ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-50'"
+                >
+                  {{ day.display }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div v-if="isLoadingMoreWeeks" class="pt-4">
+              <div class="flex items-center justify-center py-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-300"></div>
+                <span class="ml-2 text-sm text-gray-500">Loading more dates...</span>
               </div>
             </div>
           </div>
@@ -322,7 +352,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useAuth } from '../features/auth/composables/useAuth'
 import { useTask } from '../features/tasks/composables/useTask'
 import logoImage from '../../assets/images/logo.svg'
@@ -360,6 +390,12 @@ const {
 // Date filtering state
 const selectedDateFilter = ref('today')
 const selectedSpecificDate = ref('')
+
+// Infinite scrolling state
+const additionalWeeks = ref([])
+const isLoadingMoreWeeks = ref(false)
+const currentWeekOffset = ref(15) // Start from 15 days ago (after week before last which is 8-14 days)
+const hasMoreWeeks = ref(true)
 
 
 // Auth store
@@ -493,6 +529,74 @@ const getWeekNumber = (dateString) => {
   const suffixes = ['th', 'st', 'nd', 'rd']
   const v = weekNumber % 100
   return weekNumber + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0])
+}
+
+// Generate days for a specific week (7 days starting from weekOffset)
+const generateWeekDays = (weekOffset) => {
+  const days = []
+  const today = new Date()
+  
+  // Generate 7 days starting from weekOffset days ago
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today)
+    date.setDate(date.getDate() - (weekOffset + i))
+    const dateString = date.toISOString().split('T')[0]
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
+    const monthDay = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+    
+    days.push({
+      date: dateString,
+      display: `${dayName}, ${monthDay}`
+    })
+  }
+  
+  return days
+}
+
+// Load more weeks
+const loadMoreWeeks = async () => {
+  if (isLoadingMoreWeeks.value || !hasMoreWeeks.value) return
+  
+  isLoadingMoreWeeks.value = true
+  
+  try {
+    // Simulate loading delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    const weekDays = generateWeekDays(currentWeekOffset.value)
+    const firstDayDate = new Date(weekDays[0].date)
+    const monthName = firstDayDate.toLocaleString('default', { month: 'long' })
+    const weekNumber = getWeekNumber(weekDays[0].date)
+    
+    const newWeek = {
+      weekOffset: currentWeekOffset.value,
+      monthName: monthName,
+      weekNumber: weekNumber,
+      days: weekDays
+    }
+    
+    additionalWeeks.value.push(newWeek)
+    currentWeekOffset.value += 7 // Move to next week
+    
+    // Limit to 52 weeks back (1 year)
+    if (currentWeekOffset.value > 365) {
+      hasMoreWeeks.value = false
+    }
+  } catch (error) {
+    console.error('Error loading more weeks:', error)
+  } finally {
+    isLoadingMoreWeeks.value = false
+  }
+}
+
+// Handle scroll events for infinite loading
+const handleSidebarScroll = (event) => {
+  const { scrollTop, scrollHeight, clientHeight } = event.target
+  
+  // Load more when user scrolls to within 100px of the bottom
+  if (scrollHeight - scrollTop - clientHeight < 100 && hasMoreWeeks.value && !isLoadingMoreWeeks.value) {
+    loadMoreWeeks()
+  }
 }
 
 const getPlaceholderText = () => {
@@ -671,6 +775,7 @@ onMounted(async () => {
   document.addEventListener('click', closeDropdown)
   document.addEventListener('keydown', handleKeydown)
   
+  
   // Set up periodic token expiration check
   if (isAuthenticated.value) {
     // Check token expiration every 5 minutes
@@ -691,6 +796,7 @@ onUnmounted(() => {
   // Remove event listeners
   document.removeEventListener('click', closeDropdown)
   document.removeEventListener('keydown', handleKeydown)
+  
   
   // Clear token check interval
   if (window.tokenCheckInterval) {
