@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useApi } from '../../../shared/composables/useApi'
+import { resetDateFilterState, hasDateFilterBeenReset } from '../../../shared/composables/useDateFilter'
 
 export interface User {
   id: number
@@ -87,6 +88,9 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem('auth_user', JSON.stringify(data.user))
         }
 
+        // Reset date filter state for new user session
+        resetDateFilterState()
+
         return { success: true, user: data.user }
       } catch (error) {
         console.error('Login failed:', error)
@@ -116,6 +120,9 @@ export const useAuthStore = defineStore('auth', {
           localStorage.removeItem('auth_token')
           localStorage.removeItem('auth_user')
         }
+
+        // Reset date filter state for new user session
+        resetDateFilterState()
       }
     },
 
@@ -227,6 +234,11 @@ export const useAuthStore = defineStore('auth', {
         this.token = token
         this.user = JSON.parse(userData)
         this.isAuthenticated = true
+
+        // Reset date filter state if it hasn't been reset yet for this session
+        if (!hasDateFilterBeenReset()) {
+          resetDateFilterState()
+        }
 
         // Check if token is expired
         this.checkTokenExpiration()

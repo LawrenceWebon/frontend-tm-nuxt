@@ -5,6 +5,8 @@ interface Notification {
   message: string
   type: 'info' | 'success' | 'error' | 'warning'
   duration: number
+  title?: string
+  persistent?: boolean
 }
 
 const notifications = reactive<Notification[]>([])
@@ -14,7 +16,8 @@ export function useNotification() {
   const add = (
     message: string,
     type: 'info' | 'success' | 'error' | 'warning' = 'info',
-    duration = 3000
+    duration = 3000,
+    options: { title?: string; persistent?: boolean } = {}
   ) => {
     const id = nextId++
 
@@ -22,7 +25,9 @@ export function useNotification() {
       id,
       message,
       type,
-      duration
+      duration: options.persistent ? 0 : duration,
+      title: options.title,
+      persistent: options.persistent
     })
 
     return id
@@ -35,13 +40,22 @@ export function useNotification() {
     }
   }
 
+  const clearAll = () => {
+    notifications.splice(0, notifications.length)
+  }
+
   return {
     notifications,
     add,
     remove,
-    success: (message: string, duration = 3000) => add(message, 'success', duration),
-    error: (message: string, duration = 3000) => add(message, 'error', duration),
-    info: (message: string, duration = 3000) => add(message, 'info', duration),
-    warning: (message: string, duration = 3000) => add(message, 'warning', duration)
+    clearAll,
+    success: (message: string, duration = 3000, options = {}) =>
+      add(message, 'success', duration, options),
+    error: (message: string, duration = 5000, options = {}) =>
+      add(message, 'error', duration, options),
+    info: (message: string, duration = 3000, options = {}) =>
+      add(message, 'info', duration, options),
+    warning: (message: string, duration = 4000, options = {}) =>
+      add(message, 'warning', duration, options)
   }
 }

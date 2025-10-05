@@ -1,4 +1,5 @@
 import { useAuthStore } from '../../features/auth/stores/auth'
+import { useNotification } from './useNotification'
 
 export interface ApiResponse<T = unknown> {
   data: T
@@ -21,6 +22,7 @@ export interface RequestOptions extends RequestInit {
 
 export function useApi() {
   const authStore = useAuthStore()
+  const { error: showError, warning: showWarning } = useNotification()
 
   // Request queue for handling concurrent requests during token refresh
   const requestQueue: Array<() => Promise<unknown>> = []
@@ -42,6 +44,38 @@ export function useApi() {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
     return { controller, timeoutId }
+  }
+
+  // Global error handler
+  const handleApiError = (error: any, context?: string) => {
+    console.error(`API Error${context ? ` in ${context}` : ''}:`, error)
+
+    if (error.status === 401) {
+      showWarning('Your session has expired. Please log in again.')
+      authStore.user = null
+      authStore.isAuthenticated = false
+      navigateTo('/login')
+    } else if (error.status === 403) {
+      showError('You do not have permission to perform this action.')
+    } else if (error.status === 404) {
+      showError('The requested resource was not found.')
+    } else if (error.status === 422) {
+      // Validation errors - show specific field errors if available
+      if (error.errors) {
+        const firstError = Object.values(error.errors)[0] as string[]
+        showError(firstError[0] || 'Validation failed')
+      } else {
+        showError(error.message || 'Validation failed')
+      }
+    } else if (error.status >= 500) {
+      showError('Server error. Please try again later.')
+    } else if (error.message === 'Request timeout') {
+      showError('Request timed out. Please check your connection and try again.')
+    } else if (error.name === 'AbortError') {
+      showError('Request was cancelled.')
+    } else {
+      showError(error.message || 'An unexpected error occurred')
+    }
   }
 
   // Get CSRF token
@@ -393,6 +427,9 @@ export function useApi() {
     patch,
     del,
     logout,
+
+    // Error handling
+    handleApiError,
 
     // Advanced methods
     uploadFile,
