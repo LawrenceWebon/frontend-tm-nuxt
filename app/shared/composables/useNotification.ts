@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue'
+import { reactive } from 'vue'
 
 interface Notification {
   id: number
@@ -11,7 +11,11 @@ const notifications = reactive<Notification[]>([])
 let nextId = 1
 
 export function useNotification() {
-  const add = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info', duration = 3000) => {
+  const add = (
+    message: string,
+    type: 'info' | 'success' | 'error' | 'warning' = 'info',
+    duration = 3000
+  ) => {
     const id = nextId++
 
     notifications.push({

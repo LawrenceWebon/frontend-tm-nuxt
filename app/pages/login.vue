@@ -5,7 +5,7 @@
       <!-- Logo -->
       <div class="flex justify-center mb-6">
         <div class="w-12 h-12 flex items-center justify-center">
-          <img :src="logoUrl" alt="Logo">
+          <img :src="logoUrl" alt="Logo" />
         </div>
       </div>
 
@@ -18,17 +18,39 @@
         </div>
 
         <!-- Error Message -->
-        <div v-if="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-          <svg class="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        <div
+          v-if="error"
+          class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start"
+        >
+          <svg
+            class="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            />
           </svg>
           <p class="text-red-700 text-sm">{{ error }}</p>
         </div>
 
         <!-- Success Message -->
-        <div v-if="successMessage" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start">
-          <svg class="w-5 h-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        <div
+          v-if="successMessage"
+          class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start"
+        >
+          <svg
+            class="w-5 h-5 text-green-400 mt-0.5 mr-3 flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
           </svg>
           <p class="text-green-700 text-sm">{{ successMessage }}</p>
         </div>
@@ -37,9 +59,7 @@
         <form @submit.prevent="handleLogin" class="space-y-6" novalidate>
           <!-- Email Field -->
           <div>
-            <label for="email" class="block text-sm text-black mb-2">
-              Email
-            </label>
+            <label for="email" class="block text-sm text-black mb-2">Email</label>
             <input
               id="email"
               v-model="form.email"
@@ -56,15 +76,15 @@
               @input="clearFieldError('email')"
               aria-describedby="email-error"
             />
-            <p v-if="emailError" id="email-error" class="mt-2 text-sm text-red-600">{{ emailError }}</p>
+            <p v-if="emailError" id="email-error" class="mt-2 text-sm text-red-600">
+              {{ emailError }}
+            </p>
           </div>
 
           <!-- Password Field -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label for="password" class="block text-sm text-black">
-                Password
-              </label>
+              <label for="password" class="block text-sm text-black">Password</label>
               <button
                 type="button"
                 @click="handleForgotPassword"
@@ -89,7 +109,9 @@
               @input="clearFieldError('password')"
               aria-describedby="password-error"
             />
-            <p v-if="passwordError" id="password-error" class="mt-2 text-sm text-red-600">{{ passwordError }}</p>
+            <p v-if="passwordError" id="password-error" class="mt-2 text-sm text-red-600">
+              {{ passwordError }}
+            </p>
           </div>
 
           <!-- Login Button -->
@@ -126,7 +148,10 @@
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
             Don't have an account?
-            <NuxtLink to="/register" class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline">
+            <NuxtLink
+              to="/register"
+              class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline"
+            >
               Sign up here
             </NuxtLink>
           </p>
@@ -175,12 +200,14 @@ const passwordError = ref('')
 // Computed properties
 const isLoading = computed(() => authLoading.value)
 const isFormValid = computed(() => {
-  return form.value.email && 
-         form.value.password && 
-         !emailError.value && 
-         !passwordError.value &&
-         isValidEmail(form.value.email) &&
-         form.value.password.length >= 6
+  return (
+    form.value.email &&
+    form.value.password &&
+    !emailError.value &&
+    !passwordError.value &&
+    isValidEmail(form.value.email) &&
+    form.value.password.length >= 6
+  )
 })
 
 // Validation functions
@@ -238,25 +265,24 @@ const handleForgotPassword = () => {
   }, 5000)
 }
 
-
 // Form submission
 const handleLogin = async () => {
   clearMessages()
-  
+
   // Validate form
   const isEmailValid = validateEmail()
   const isPasswordValid = validatePassword()
-  
+
   if (!isEmailValid || !isPasswordValid) {
     return
   }
 
   try {
     const result = await login(form.value.email, form.value.password)
-    
+
     if (result.success) {
       successMessage.value = 'Login successful! Redirecting...'
-      
+
       // Check for stored redirect path
       let redirectPath = '/'
       if (typeof window !== 'undefined') {
@@ -266,7 +292,7 @@ const handleLogin = async () => {
           sessionStorage.removeItem('auth.redirect')
         }
       }
-      
+
       // Redirect after a short delay
       setTimeout(async () => {
         await router.push(redirectPath)
@@ -297,7 +323,7 @@ watch([emailError, passwordError], () => {
 })
 
 // Auto-clear success messages
-watch(successMessage, (newValue) => {
+watch(successMessage, newValue => {
   if (newValue) {
     setTimeout(() => {
       successMessage.value = ''
@@ -306,7 +332,7 @@ watch(successMessage, (newValue) => {
 })
 
 // Auto-clear error messages
-watch(error, (newValue) => {
+watch(error, newValue => {
   if (newValue) {
     setTimeout(() => {
       error.value = ''
@@ -314,4 +340,3 @@ watch(error, (newValue) => {
   }
 })
 </script>
-

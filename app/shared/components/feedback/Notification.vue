@@ -5,16 +5,8 @@
   >
     <div class="flex">
       <div class="flex-shrink-0">
-        <AlertCircle
-          v-if="type === 'error'"
-          :class="'text-red-500'"
-          :size="20"
-        />
-        <CheckCircle
-          v-else
-          :class="'text-green-500'"
-          :size="20"
-        />
+        <AlertCircle v-if="type === 'error'" :class="'text-red-500'" :size="20" />
+        <CheckCircle v-else :class="'text-green-500'" :size="20" />
       </div>
       <div class="ml-3">
         <p class="text-sm font-medium text-gray-900">{{ message }}</p>

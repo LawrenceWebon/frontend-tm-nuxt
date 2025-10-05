@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defineStore } from 'pinia'
 import { useApi } from '../../../shared/composables/useApi'
 
@@ -19,7 +18,7 @@ const deletingTaskIds = new Set<number>()
 export const useTaskStore = defineStore('task', {
   state: () => ({
     tasks: [] as Task[],
-    currentDate: new Date().toISOString().split('T')[0],
+    currentDate: new Date().toISOString().split('T')[0] as string,
     loading: false,
     error: null as string | null,
     // Search-related state
@@ -27,11 +26,11 @@ export const useTaskStore = defineStore('task', {
     searchResults: [] as Task[],
     isSearching: false,
     // Sorting state
-    sortBy: 'order' as 'order' | 'priority' | 'title',
+    sortBy: 'order' as 'order' | 'priority' | 'title'
   }),
 
   getters: {
-    tasksForCurrentDate: (state: any) => {
+    tasksForCurrentDate: (state: { tasks: Task[]; currentDate: string }) => {
       const filtered = state.tasks.filter((task: Task) => {
         // Convert task date to YYYY-MM-DD format for comparison
         const taskDate = new Date(task.date).toISOString().split('T')[0]
@@ -39,10 +38,16 @@ export const useTaskStore = defineStore('task', {
       })
       return filtered
     },
-    
-    filteredTasks: (state: any) => {
+
+    filteredTasks: (state: {
+      tasks: Task[]
+      searchQuery: string
+      sortBy: string
+      isSearching: boolean
+      searchResults: Task[]
+    }) => {
       let tasks: Task[]
-      
+
       if (state.searchQuery && state.isSearching) {
         tasks = state.searchResults
       } else {
@@ -61,19 +66,19 @@ export const useTaskStore = defineStore('task', {
           return a.order - b.order
         }
       })
-    },
+    }
   },
 
   actions: {
     async fetchTasks() {
       this.loading = true
       this.error = null
-      
+
       try {
         const { get } = useApi()
         const response = await get('/tasks')
         this.tasks = response.data || []
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Failed to fetch tasks'
         console.error('Failed to fetch tasks:', error)
       } finally {
@@ -84,17 +89,17 @@ export const useTaskStore = defineStore('task', {
     async createTask(taskData: Partial<Task>) {
       this.loading = true
       this.error = null
-      
+
       try {
         const { post } = useApi()
         const response = await post('/tasks', taskData)
-        
+
         if (response.data) {
           this.tasks.unshift(response.data)
         }
-        
+
         return response.data
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Failed to create task'
         console.error('Failed to create task:', error)
         throw error
@@ -103,20 +108,20 @@ export const useTaskStore = defineStore('task', {
       }
     },
 
-    async updateTask(taskId: number, updates: Partial<Task>): Promise<any> {
+    async updateTask(taskId: number, updates: Partial<Task>): Promise<Task | null> {
       this.loading = true
       this.error = null
-      
+
       try {
         const { put } = useApi()
         const response = await put(`/tasks/${taskId}`, updates)
-        
+
         if (response.data) {
           const index = this.tasks.findIndex((t: Task) => t.id === taskId)
           if (index !== -1) {
             this.tasks[index] = response.data
           }
-          
+
           // Also update searchResults if we're in search mode
           if (this.isSearching && this.searchResults.length > 0) {
             const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
@@ -125,9 +130,9 @@ export const useTaskStore = defineStore('task', {
             }
           }
         }
-        
+
         return response.data
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Failed to update task'
         console.error('Failed to update task:', error)
         throw error
@@ -142,24 +147,24 @@ export const useTaskStore = defineStore('task', {
         console.warn('DUPLICATE DELETE PREVENTED! Task', taskId, 'is already being deleted')
         return
       }
-      
+
       // Mark this task as being deleted
       deletingTaskIds.add(taskId)
-      
+
       this.loading = true
       this.error = null
-      
+
       try {
         const { del } = useApi()
         await del(`/tasks/${taskId}`)
-        
+
         this.tasks = this.tasks.filter((t: Task) => t.id !== taskId)
-        
+
         // Also remove from searchResults if we're in search mode
         if (this.isSearching && this.searchResults.length > 0) {
           this.searchResults = this.searchResults.filter((t: Task) => t.id !== taskId)
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handle different error cases
         if (error.status === 404) {
           console.log('Task not found, removing from local state')
@@ -209,10 +214,10 @@ export const useTaskStore = defineStore('task', {
       try {
         const { get } = useApi()
         const response = await get(`/tasks?search=${encodeURIComponent(query)}`)
-        
+
         this.searchResults = response.data || []
         return this.searchResults
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Search failed'
         console.error('Search failed:', error)
         return []
@@ -234,11 +239,11 @@ export const useTaskStore = defineStore('task', {
 
     async updateTaskPriority(taskId: number, priority: 'high' | 'medium' | 'low') {
       this.error = null
-      
+
       try {
         const { put } = useApi()
         const response = await put(`/tasks/${taskId}`, { priority })
-        
+
         if (response.data) {
           // Update task in local state - use reactive update
           const index = this.tasks.findIndex((t: Task) => t.id === taskId)
@@ -247,7 +252,7 @@ export const useTaskStore = defineStore('task', {
             this.tasks[index].priority = response.data.priority
             this.tasks[index].updated_at = response.data.updated_at
           }
-          
+
           // Also update searchResults if we're in search mode
           if (this.isSearching && this.searchResults.length > 0) {
             const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
@@ -257,9 +262,9 @@ export const useTaskStore = defineStore('task', {
             }
           }
         }
-        
+
         return response.data
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Failed to update task priority'
         console.error('Failed to update task priority:', error)
         return null
@@ -268,11 +273,11 @@ export const useTaskStore = defineStore('task', {
 
     async updateTaskStatus(taskId: number, status: 'pending' | 'completed') {
       this.error = null
-      
+
       try {
         const { put } = useApi()
         const response = await put(`/tasks/${taskId}`, { status })
-        
+
         if (response.data) {
           // Update task in local state - use reactive update
           const index = this.tasks.findIndex((t: Task) => t.id === taskId)
@@ -281,7 +286,7 @@ export const useTaskStore = defineStore('task', {
             this.tasks[index].status = response.data.status
             this.tasks[index].updated_at = response.data.updated_at
           }
-          
+
           // Also update searchResults if we're in search mode
           if (this.isSearching && this.searchResults.length > 0) {
             const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
@@ -291,9 +296,9 @@ export const useTaskStore = defineStore('task', {
             }
           }
         }
-        
+
         return response.data
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Failed to update task status'
         console.error('Failed to update task status:', error)
         return null
@@ -302,11 +307,11 @@ export const useTaskStore = defineStore('task', {
 
     async updateTaskTitle(taskId: number, title: string) {
       this.error = null
-      
+
       try {
         const { put } = useApi()
         const response = await put(`/tasks/${taskId}`, { title })
-        
+
         if (response.data) {
           // Update task in local state - use reactive update
           const index = this.tasks.findIndex((t: Task) => t.id === taskId)
@@ -315,7 +320,7 @@ export const useTaskStore = defineStore('task', {
             this.tasks[index].title = response.data.title
             this.tasks[index].updated_at = response.data.updated_at
           }
-          
+
           // Also update searchResults if we're in search mode
           if (this.isSearching && this.searchResults.length > 0) {
             const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
@@ -325,9 +330,9 @@ export const useTaskStore = defineStore('task', {
             }
           }
         }
-        
+
         return response.data
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.error = error.message || 'Failed to update task title'
         console.error('Failed to update task title:', error)
         return null
@@ -371,13 +376,13 @@ export const useTaskStore = defineStore('task', {
         })
 
         return true
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('❌ TaskStore reorderTasks error:', error)
         this.error = error.message
         // Revert local state on error
         this.tasks = originalTasks
         return false
       }
-    },
-  },
+    }
+  }
 })

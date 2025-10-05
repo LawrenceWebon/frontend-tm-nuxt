@@ -1,6 +1,6 @@
 import { useAuth } from '../features/auth/composables/useAuth'
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
+export default defineNuxtRouteMiddleware(async (_to, _from) => {
   const { isAuthenticated, checkAuth } = useAuth()
 
   // Check if user is authenticated
@@ -16,16 +16,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         return navigateTo(redirectPath)
       }
     }
-    
+
     return navigateTo('/')
   }
 })
-
-
-
-
-
-
-
-
-

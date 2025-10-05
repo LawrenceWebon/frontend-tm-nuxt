@@ -2,7 +2,12 @@ import { useAuthStore } from '../stores/auth'
 
 export interface LoginResult {
   success: boolean
-  user?: any
+  user?: {
+    id: number
+    name: string
+    email: string
+    role: string
+  }
   error?: string
 }
 
@@ -14,7 +19,7 @@ export interface AuthError {
 export function useAuth() {
   const authStore = useAuthStore()
   const router = useRouter()
-  
+
   // Loading states
   const isLoading = ref(false)
   const isLoggingIn = ref(false)
@@ -24,10 +29,10 @@ export function useAuth() {
   const login = async (email: string, password: string): Promise<LoginResult> => {
     isLoggingIn.value = true
     isLoading.value = true
-    
+
     try {
       const result = await authStore.login(email, password)
-      
+
       if (result.success) {
         // Redirect to home page on successful login
         await router.push('/')
@@ -47,7 +52,7 @@ export function useAuth() {
   const logout = async (): Promise<boolean> => {
     isLoggingOut.value = true
     isLoading.value = true
-    
+
     try {
       await authStore.logout()
       await router.push('/login')
@@ -66,7 +71,7 @@ export function useAuth() {
   const checkAuth = async (): Promise<boolean> => {
     isCheckingAuth.value = true
     isLoading.value = true
-    
+
     try {
       return await authStore.checkAuth()
     } catch (error) {
@@ -80,7 +85,7 @@ export function useAuth() {
 
   const fetchUser = async () => {
     isLoading.value = true
-    
+
     try {
       return await authStore.fetchUser()
     } catch (error) {
@@ -91,9 +96,14 @@ export function useAuth() {
     }
   }
 
-  const register = async (name: string, email: string, password: string, passwordConfirmation: string): Promise<LoginResult> => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string
+  ): Promise<LoginResult> => {
     isLoading.value = true
-    
+
     try {
       // Validate password confirmation
       if (password !== passwordConfirmation) {
@@ -105,9 +115,14 @@ export function useAuth() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json'
         },
-        body: JSON.stringify({ name, email, password, password_confirmation: passwordConfirmation }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          password_confirmation: passwordConfirmation
+        }),
         credentials: 'include'
       })
 
@@ -116,8 +131,8 @@ export function useAuth() {
         return { success: false, error: errorData.message || 'Registration failed' }
       }
 
-      const data = await response.json()
-      
+      const _data = await response.json()
+
       // Auto-login after successful registration
       const loginResult = await login(email, password)
       return loginResult
@@ -129,15 +144,18 @@ export function useAuth() {
     }
   }
 
-  const requestPasswordReset = async (email: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+  const requestPasswordReset = async (
+    email: string
+  ): Promise<{ success: boolean; message?: string; error?: string }> => {
     isLoading.value = true
-    
+
     try {
+      const config = useRuntimeConfig()
       const response = await fetch(`${config.public.apiUrl}/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json'
         },
         body: JSON.stringify({ email }),
         credentials: 'include'
@@ -158,26 +176,32 @@ export function useAuth() {
     }
   }
 
-  const resetPassword = async (token: string, email: string, password: string, passwordConfirmation: string): Promise<LoginResult> => {
+  const resetPassword = async (
+    token: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string
+  ): Promise<LoginResult> => {
     isLoading.value = true
-    
+
     try {
       // Validate password confirmation
       if (password !== passwordConfirmation) {
         return { success: false, error: 'Passwords do not match' }
       }
 
+      const config = useRuntimeConfig()
       const response = await fetch(`${config.public.apiUrl}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json'
         },
-        body: JSON.stringify({ 
-          token, 
-          email, 
-          password, 
-          password_confirmation: passwordConfirmation 
+        body: JSON.stringify({
+          token,
+          email,
+          password,
+          password_confirmation: passwordConfirmation
         }),
         credentials: 'include'
       })
@@ -187,8 +211,8 @@ export function useAuth() {
         return { success: false, error: errorData.message || 'Password reset failed' }
       }
 
-      const data = await response.json()
-      
+      const _data = await response.json()
+
       // Auto-login after successful password reset
       const loginResult = await login(email, password)
       return loginResult
@@ -200,16 +224,20 @@ export function useAuth() {
     }
   }
 
-  const updateProfile = async (userData: { name?: string; email?: string }): Promise<LoginResult> => {
+  const updateProfile = async (userData: {
+    name?: string
+    email?: string
+  }): Promise<LoginResult> => {
     isLoading.value = true
-    
+
     try {
+      const config = useRuntimeConfig()
       const response = await fetch(`${config.public.apiUrl}/user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${authStore.token}`
+          Accept: 'application/json',
+          Authorization: `Bearer ${authStore.token}`
         },
         body: JSON.stringify(userData),
         credentials: 'include'
@@ -221,10 +249,10 @@ export function useAuth() {
       }
 
       const data = await response.json()
-      
+
       // Update user data in store
       authStore.user = data.user
-      
+
       // Update localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth_user', JSON.stringify(data.user))
@@ -239,23 +267,28 @@ export function useAuth() {
     }
   }
 
-  const changePassword = async (currentPassword: string, newPassword: string, newPasswordConfirmation: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string,
+    newPasswordConfirmation: string
+  ): Promise<{ success: boolean; message?: string; error?: string }> => {
     isLoading.value = true
-    
+
     try {
       // Validate password confirmation
       if (newPassword !== newPasswordConfirmation) {
         return { success: false, error: 'New passwords do not match' }
       }
 
+      const config = useRuntimeConfig()
       const response = await fetch(`${config.public.apiUrl}/user/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${authStore.token}`
+          Accept: 'application/json',
+          Authorization: `Bearer ${authStore.token}`
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           current_password: currentPassword,
           password: newPassword,
           password_confirmation: newPasswordConfirmation
@@ -287,19 +320,19 @@ export function useAuth() {
     isAuthenticated: computed(() => authStore.isAuthenticated),
     isLoggedIn: computed(() => authStore.isLoggedIn),
     currentUser: computed(() => authStore.currentUser),
-    
+
     // Loading states
     isLoading: readonly(isLoading),
     isLoggingIn: readonly(isLoggingIn),
     isLoggingOut: readonly(isLoggingOut),
     isCheckingAuth: readonly(isCheckingAuth),
-    
+
     // Core actions
     login,
     logout,
     checkAuth,
     fetchUser,
-    
+
     // Extended actions
     register,
     requestPasswordReset,

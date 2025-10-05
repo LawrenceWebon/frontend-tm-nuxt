@@ -8,14 +8,8 @@
       :disabled="isSearching"
     >
       <template #item="{ element }">
-        <div 
-          class="mb-2"
-          :class="{ 'cursor-move': !isSearching && sortBy === 'order' }"
-        >
-          <TaskItem
-            :task="element"
-            @delete-task="$emit('delete-task', $event)"
-          />
+        <div class="mb-2" :class="{ 'cursor-move': !isSearching && sortBy === 'order' }">
+          <TaskItem :task="element" @delete-task="$emit('delete-task', $event)" />
         </div>
       </template>
     </draggable>
@@ -23,23 +17,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import draggable from 'vuedraggable'
 import { useTask } from '../../composables/useTask'
 import { useNotification } from '../../../../shared/composables/useNotification'
 import TaskItem from './TaskItem.vue'
 import type { Task } from '../../stores/task'
 
-const emit = defineEmits<{
+const _emit = defineEmits<{
   'delete-task': [task: Task]
 }>()
 
-const {
-  filteredTasks,
-  reorderTasks,
-  isSearching,
-  sortBy
-} = useTask()
+const { filteredTasks, reorderTasks, isSearching, sortBy } = useTask()
 
 const { error, success } = useNotification()
 
@@ -47,16 +36,20 @@ const { error, success } = useNotification()
 const dragTasks = ref<Task[]>([])
 
 // Watch for changes in filteredTasks and update dragTasks
-watch(filteredTasks, (newTasks) => {
-  dragTasks.value = [...newTasks]
-}, { immediate: true })
+watch(
+  filteredTasks,
+  newTasks => {
+    dragTasks.value = [...newTasks]
+  },
+  { immediate: true }
+)
 
 const handleReorder = async () => {
   // Only reorder if we're in custom order mode and not searching
   if (!isSearching.value && sortBy.value === 'order') {
     try {
       const result = await reorderTasks(dragTasks.value)
-      
+
       if (result) {
         success('Task order saved successfully')
       } else {

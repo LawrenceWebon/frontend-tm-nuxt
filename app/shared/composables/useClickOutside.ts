@@ -28,7 +28,7 @@ export function onClickOutside(target: Ref<boolean>, callback: () => void) {
  * @param excludeSelectors - Array of CSS selectors to exclude from outside detection
  */
 export function useClickOutside(
-  target: Ref<boolean>, 
+  target: Ref<boolean>,
   callback: () => void,
   excludeSelectors: string[] = []
 ) {
@@ -36,15 +36,13 @@ export function useClickOutside(
     if (!target.value) return
 
     const targetElement = event.target as Element
-    
+
     // Check if click is inside the target element or its children
     const isInsideTarget = targetElement.closest('.relative')
     if (isInsideTarget) return
 
     // Check if click is inside any excluded selectors
-    const isInsideExcluded = excludeSelectors.some(selector => 
-      targetElement.closest(selector)
-    )
+    const isInsideExcluded = excludeSelectors.some(selector => targetElement.closest(selector))
     if (isInsideExcluded) return
 
     callback()

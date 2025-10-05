@@ -15,7 +15,16 @@
     "preview": "nuxt preview",
     "preview:staging": "nuxt preview --dotenv .env.staging",
     "preview:production": "nuxt preview --dotenv .env.production",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
+    "lint:check": "eslint . --ext .vue,.js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "vue-tsc --noEmit",
+    "type-check:watch": "vue-tsc --noEmit --watch",
+    "check-all": "pnpm run type-check && pnpm run lint:check && pnpm run format:check",
+    "fix-all": "pnpm run lint:fix && pnpm run format"
   },
   "dependencies": {
     "@nuxtjs/eslint-module": "^4.1.0",
@@ -29,7 +38,19 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.37.0",
     "@playwright/test": "^1.55.1",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-nuxt": "^4.0.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-vue": "^10.5.0",
+    "prettier": "^3.6.2",
+    "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.1.0"
   }
 }

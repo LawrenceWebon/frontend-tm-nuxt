@@ -22,8 +22,8 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isLoggedIn: (state) => state.isAuthenticated && !!state.token,
-    currentUser: (state) => state.user
+    isLoggedIn: state => state.isAuthenticated && !!state.token,
+    currentUser: state => state.user
   },
 
   actions: {
@@ -37,11 +37,11 @@ export const useAuthStore = defineStore('auth', {
           method: 'GET',
           credentials: 'include',
           headers: {
-            'Accept': 'application/json',
-            'Origin': window.location.origin
+            Accept: 'application/json',
+            Origin: window.location.origin
           }
         })
-        
+
         if (response.ok) {
           const data = await response.json()
           return data.csrf_token
@@ -57,13 +57,13 @@ export const useAuthStore = defineStore('auth', {
       try {
         // Get CSRF token first
         const csrfToken = await this.getCsrfToken()
-        
+
         const response = await fetch(`${this.getApiUrl()}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': window.location.origin,
+            Accept: 'application/json',
+            Origin: window.location.origin,
             ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
           },
           body: JSON.stringify({ email, password }),
@@ -76,7 +76,7 @@ export const useAuthStore = defineStore('auth', {
         }
 
         const data = await response.json()
-        
+
         this.user = data.user
         this.token = data.token
         this.isAuthenticated = true
@@ -90,9 +90,9 @@ export const useAuthStore = defineStore('auth', {
         return { success: true, user: data.user }
       } catch (error) {
         console.error('Login failed:', error)
-        return { 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Login failed' 
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Login failed'
         }
       }
     },
@@ -139,8 +139,8 @@ export const useAuthStore = defineStore('auth', {
         // Verify token is still valid by fetching user data
         const response = await fetch(`${this.getApiUrl()}/user`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json'
           },
           credentials: 'include'
         })
@@ -159,13 +159,13 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         this.token = null
         this.isAuthenticated = false
-        
+
         // Clear localStorage
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth_token')
           localStorage.removeItem('auth_user')
         }
-        
+
         return false
       }
     },
@@ -178,8 +178,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await fetch(`${this.getApiUrl()}/user`, {
           headers: {
-            'Authorization': `Bearer ${this.token}`,
-            'Accept': 'application/json'
+            Authorization: `Bearer ${this.token}`,
+            Accept: 'application/json'
           },
           credentials: 'include'
         })
@@ -203,13 +203,13 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         this.token = null
         this.isAuthenticated = false
-        
+
         // Clear localStorage
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth_token')
           localStorage.removeItem('auth_user')
         }
-        
+
         return null
       }
     },
@@ -227,7 +227,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = token
         this.user = JSON.parse(userData)
         this.isAuthenticated = true
-        
+
         // Check if token is expired
         this.checkTokenExpiration()
       }
@@ -245,7 +245,7 @@ export const useAuthStore = defineStore('auth', {
         if (tokenParts.length === 3 && tokenParts[1]) {
           const payload = JSON.parse(atob(tokenParts[1]))
           const currentTime = Math.floor(Date.now() / 1000)
-          
+
           // If token is expired or expires within 5 minutes, refresh it
           if (payload.exp && (payload.exp <= currentTime || payload.exp <= currentTime + 300)) {
             console.log('Token expired or expiring soon, refreshing...')
@@ -264,7 +264,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { refreshToken } = useApi()
         const success = await refreshToken()
-        
+
         if (!success) {
           // Refresh failed, logout user
           this.logout()

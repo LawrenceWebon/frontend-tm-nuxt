@@ -1,11 +1,12 @@
 <template>
-  <li class="flex items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-
+  <li
+    class="flex items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+  >
     <!-- Checkbox -->
     <button
       @click="toggleTask(task.id)"
       class="w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 hover:border-gray-400 transition-colors flex-shrink-0"
-      :class="{ 
+      :class="{
         'bg-black border-black': task.status === 'completed',
         'border-gray-300 bg-white': task.status !== 'completed'
       }"
@@ -16,7 +17,11 @@
         fill="currentColor"
         viewBox="0 0 20 20"
       >
-        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        <path
+          fill-rule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clip-rule="evenodd"
+        />
       </svg>
     </button>
 
@@ -39,7 +44,7 @@
           v-else
           @click="startEdit"
           class="text-gray-900 px-2 py-1 rounded transition-colors text-sm flex-1 min-w-0"
-          :class="{ 
+          :class="{
             'line-through text-gray-500 cursor-not-allowed': task.status === 'completed',
             'cursor-pointer hover:bg-gray-50': task.status !== 'completed'
           }"
@@ -63,14 +68,19 @@
                 }"
               >
                 {{ task.priority }}
-                <svg 
-                  class="w-3 h-3 ml-1" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  class="w-3 h-3 ml-1"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                   :class="{ 'opacity-50': task.status === 'completed' }"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
 
@@ -123,7 +133,12 @@
       class="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 ml-2"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+        />
       </svg>
     </button>
   </li>
@@ -142,16 +157,10 @@ const emit = defineEmits<{
   'delete-task': [task: Task]
 }>()
 
-const { 
-  isSearching, 
-  updateTask, 
-  updateTaskPriority,
-  updateTaskStatus,
-  updateTaskTitle
-} = useTask()
+const { isSearching, updateTaskPriority, updateTaskStatus, updateTaskTitle } = useTask()
 
 // Computed property to avoid TypeScript comparison issues
-const isCompleted = computed(() => props.task.status === 'completed')
+const _isCompleted = computed(() => props.task.status === 'completed')
 
 // Priority menu state
 const priorityMenuOpen = ref<number | null>(null)
@@ -171,7 +180,7 @@ const formatDate = (dateString: string) => {
 const togglePriorityMenu = (taskId: number) => {
   // Don't open menu for completed tasks
   if (props.task.status === 'completed') return
-  
+
   priorityMenuOpen.value = priorityMenuOpen.value === taskId ? null : taskId
 }
 
@@ -188,7 +197,7 @@ const updatePriority = async (taskId: number, priority: 'high' | 'medium' | 'low
 const toggleTask = async (taskId: number) => {
   try {
     const newStatus = props.task.status === 'completed' ? 'pending' : 'completed'
-    
+
     await updateTaskStatus(taskId, newStatus)
   } catch (error) {
     console.error('Failed to update task status:', error)
@@ -203,10 +212,10 @@ const confirmDelete = (task: Task) => {
 // Title editing methods
 const startEdit = () => {
   if (props.task.status === 'completed') return
-  
+
   isEditing.value = true
   editingTitle.value = props.task.title
-  
+
   nextTick(() => {
     titleInput.value?.focus()
     titleInput.value?.select()
@@ -215,15 +224,15 @@ const startEdit = () => {
 
 const saveTitle = async () => {
   if (!isEditing.value) return
-  
+
   const newTitle = editingTitle.value.trim()
-  
+
   // Don't save if title is empty or unchanged
   if (!newTitle || newTitle === props.task.title) {
     cancelEdit()
     return
   }
-  
+
   try {
     await updateTaskTitle(props.task.id, newTitle)
     isEditing.value = false

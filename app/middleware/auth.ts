@@ -1,7 +1,7 @@
 import { useAuth } from '../features/auth/composables/useAuth'
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
-  const { isAuthenticated, checkAuth, isLoading } = useAuth()
+export default defineNuxtRouteMiddleware(async (to, _from) => {
+  const { isAuthenticated, checkAuth } = useAuth()
 
   // Public routes that don't require authentication
   const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
@@ -13,12 +13,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     if (!isAuthenticated.value) {
       await checkAuth()
     }
-    
+
     // If user is authenticated and trying to access login/register, redirect to home
     if (isAuthenticated.value && ['/login', '/register'].includes(to.path)) {
       return navigateTo('/')
     }
-    
+
     return
   }
 
@@ -44,7 +44,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (requiredRoles && requiredRoles.length > 0) {
     const { user } = useAuth()
     const userRole = user.value?.role || 'user'
-    
+
     if (!requiredRoles.includes(userRole)) {
       throw createError({
         statusCode: 403,

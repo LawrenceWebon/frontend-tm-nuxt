@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../features/auth/stores/auth'
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T
   message?: string
   status: number
@@ -21,9 +21,9 @@ export interface RequestOptions extends RequestInit {
 
 export function useApi() {
   const authStore = useAuthStore()
-  
+
   // Request queue for handling concurrent requests during token refresh
-  const requestQueue: Array<() => Promise<any>> = []
+  const requestQueue: Array<() => Promise<unknown>> = []
   let isRefreshing = false
 
   // Base API URL from environment variables
@@ -51,11 +51,11 @@ export function useApi() {
         method: 'GET',
         credentials: 'include',
         headers: {
-          'Accept': 'application/json',
-          'Origin': window.location.origin
+          Accept: 'application/json',
+          Origin: window.location.origin
         }
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         return data.csrf_token
@@ -71,7 +71,7 @@ export function useApi() {
   const refreshToken = async (): Promise<boolean> => {
     if (isRefreshing) {
       // Wait for ongoing refresh
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const checkRefresh = () => {
           if (!isRefreshing) {
             resolve(authStore.isAuthenticated)
@@ -87,12 +87,12 @@ export function useApi() {
 
     try {
       const csrfToken = await getCsrfToken()
-      
+
       const response = await fetch(`${baseURL}/refresh-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
           ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
         },
         credentials: 'include'
@@ -102,12 +102,12 @@ export function useApi() {
         const data = await response.json()
         authStore.token = data.token
         authStore.isAuthenticated = true
-        
+
         // Update localStorage
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_token', data.token)
         }
-        
+
         return true
       } else {
         throw new Error('Token refresh failed')
@@ -121,7 +121,7 @@ export function useApi() {
       return false
     } finally {
       isRefreshing = false
-      
+
       // Process queued requests
       const queue = [...requestQueue]
       requestQueue.length = 0
@@ -130,11 +130,16 @@ export function useApi() {
   }
 
   // Enhanced fetch with authentication
-  const fetchWithAuth = async <T = any>(
-    url: string, 
+  const fetchWithAuth = async <T = unknown>(
+    url: string,
     options: RequestOptions = {}
   ): Promise<ApiResponse<T>> => {
-    const { timeout = 10000, retries = 3, skipAuth = false, ...fetchOptions } = {
+    const {
+      timeout = 10000,
+      retries = 3,
+      skipAuth = false,
+      ...fetchOptions
+    } = {
       ...defaultOptions,
       ...options
     }
@@ -144,9 +149,9 @@ export function useApi() {
     const makeRequest = async (attempt: number = 1): Promise<ApiResponse<T>> => {
       try {
         const headers: Record<string, string> = {
-          'Accept': 'application/json',
-          'Origin': window.location.origin,
-          ...(fetchOptions.headers as Record<string, string> || {})
+          Accept: 'application/json',
+          Origin: window.location.origin,
+          ...((fetchOptions.headers as Record<string, string>) || {})
         }
 
         // Add content type for non-GET requests with body
@@ -183,7 +188,7 @@ export function useApi() {
               return makeRequest(attempt + 1)
             }
           }
-          
+
           // Refresh failed or max retries reached
           // Clear local state without calling logout API
           authStore.user = null
@@ -201,25 +206,24 @@ export function useApi() {
             status: response.status,
             errors: errorData.errors
           }
-          
+
           // Don't retry on client errors (4xx) for DELETE operations
           if (response.status >= 400 && response.status < 500 && fetchOptions.method === 'DELETE') {
             throw error
           }
-          
+
           throw error
         }
 
         // Parse response
         const data = await response.json()
-        
+
         return {
           data: data.data || data,
           message: data.message,
           status: response.status,
           success: true
         }
-
       } catch (error) {
         clearTimeout(timeoutId)
 
@@ -227,8 +231,12 @@ export function useApi() {
           if (error.name === 'AbortError') {
             throw new Error('Request timeout')
           }
-          
-          if (attempt < retries && !error.message.includes('Unauthorized') && !error.message.includes('Forbidden')) {
+
+          if (
+            attempt < retries &&
+            !error.message.includes('Unauthorized') &&
+            !error.message.includes('Forbidden')
+          ) {
             // Retry on network errors, but not on client errors (4xx)
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
             return makeRequest(attempt + 1)
@@ -257,46 +265,58 @@ export function useApi() {
   }
 
   // Convenience methods
-  const get = <T = any>(url: string, options: RequestOptions = {}): Promise<ApiResponse<T>> => 
+  const get = <T = unknown>(url: string, options: RequestOptions = {}): Promise<ApiResponse<T>> =>
     fetchWithAuth<T>(url, { ...options, method: 'GET' })
 
-  const post = <T = any>(url: string, data?: any, options: RequestOptions = {}): Promise<ApiResponse<T>> => 
-    fetchWithAuth<T>(url, { 
-      ...options, 
-      method: 'POST', 
+  const post = <T = unknown>(
+    url: string,
+    data?: unknown,
+    options: RequestOptions = {}
+  ): Promise<ApiResponse<T>> =>
+    fetchWithAuth<T>(url, {
+      ...options,
+      method: 'POST',
       body: data instanceof FormData ? data : JSON.stringify(data)
     })
 
-  const put = <T = any>(url: string, data?: any, options: RequestOptions = {}): Promise<ApiResponse<T>> => 
-    fetchWithAuth<T>(url, { 
-      ...options, 
-      method: 'PUT', 
+  const put = <T = unknown>(
+    url: string,
+    data?: unknown,
+    options: RequestOptions = {}
+  ): Promise<ApiResponse<T>> =>
+    fetchWithAuth<T>(url, {
+      ...options,
+      method: 'PUT',
       body: data instanceof FormData ? data : JSON.stringify(data)
     })
 
-  const patch = <T = any>(url: string, data?: any, options: RequestOptions = {}): Promise<ApiResponse<T>> => 
-    fetchWithAuth<T>(url, { 
-      ...options, 
-      method: 'PATCH', 
+  const patch = <T = unknown>(
+    url: string,
+    data?: unknown,
+    options: RequestOptions = {}
+  ): Promise<ApiResponse<T>> =>
+    fetchWithAuth<T>(url, {
+      ...options,
+      method: 'PATCH',
       body: data instanceof FormData ? data : JSON.stringify(data)
     })
 
-  const del = <T = any>(url: string, options: RequestOptions = {}): Promise<ApiResponse<T>> => 
+  const del = <T = unknown>(url: string, options: RequestOptions = {}): Promise<ApiResponse<T>> =>
     fetchWithAuth<T>(url, { ...options, method: 'DELETE' })
 
   // File upload helper
-  const uploadFile = async <T = any>(
-    url: string, 
-    file: File, 
-    additionalData: Record<string, any> = {},
+  const uploadFile = async <T = unknown>(
+    url: string,
+    file: File,
+    additionalData: Record<string, unknown> = {},
     options: RequestOptions = {}
   ): Promise<ApiResponse<T>> => {
     const formData = new FormData()
     formData.append('file', file)
-    
+
     // Add additional data
     Object.entries(additionalData).forEach(([key, value]) => {
-      formData.append(key, value)
+      formData.append(key, String(value))
     })
 
     return post<T>(url, formData, {
@@ -309,19 +329,16 @@ export function useApi() {
   }
 
   // Batch requests helper
-  const batch = async <T = any>(
+  const batch = async <T = unknown>(
     requests: Array<() => Promise<ApiResponse<T>>>
   ): Promise<ApiResponse<T>[]> => {
     return Promise.all(requests.map(request => request()))
   }
 
   // Request cancellation
-  const createCancellableRequest = <T = any>(
-    url: string, 
-    options: RequestOptions = {}
-  ) => {
+  const createCancellableRequest = <T = unknown>(url: string, options: RequestOptions = {}) => {
     const { controller } = createAbortController(options.timeout || 10000)
-    
+
     const request = fetchWithAuth<T>(url, {
       ...options,
       signal: controller.signal
@@ -339,11 +356,11 @@ export function useApi() {
       const response = await fetch(`${baseURL}/logout`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authStore.token}`,
+          Authorization: `Bearer ${authStore.token}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Content-Length': '0',
-          'Origin': window.location.origin
+          Origin: window.location.origin
         },
         body: '', // Empty body as expected by the API
         credentials: 'include'
@@ -352,7 +369,7 @@ export function useApi() {
       if (response.ok) {
         const data = await response.json()
         return {
-          data: data,
+          data,
           message: data.message || 'Logged out successfully',
           status: response.status,
           success: true
@@ -376,12 +393,12 @@ export function useApi() {
     patch,
     del,
     logout,
-    
+
     // Advanced methods
     uploadFile,
     batch,
     createCancellableRequest,
-    
+
     // Utilities
     refreshToken
   }

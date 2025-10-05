@@ -2,12 +2,9 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  
+
   // Enable modules
-  modules: [
-    '@pinia/nuxt',
-    '@nuxtjs/tailwindcss'
-  ],
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
 
   // Alias configuration for app directory structure
   alias: {
@@ -69,6 +66,14 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'A simple and elegant task management application' }
       ]
+    }
+  },
+
+  // Router configuration to handle service worker requests
+  router: {
+    options: {
+      // This helps prevent router warnings for non-page routes
+      strict: false
     }
   }
 })
