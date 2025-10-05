@@ -247,7 +247,7 @@
             </div>
 
             <!-- Hide this input when selectedDateFilter is 'today' -->
-            <div v-if="selectedDateFilter !== 'today'" class="block">
+            <div v-if="selectedDateFilter !== 'today' || filteredTasks.length > 0" class="block">
               <!-- Add New Task Input (fixed at bottom) -->
               <div class="pt-6 pb-6 bg-white" style="width: 80%; margin: 0 auto;">
                 <div class="relative">

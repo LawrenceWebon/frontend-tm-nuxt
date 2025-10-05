@@ -26,8 +26,9 @@ export function useApi() {
   const requestQueue: Array<() => Promise<any>> = []
   let isRefreshing = false
 
-  // Base API URL
-  const baseURL = 'http://localhost/api'
+  // Base API URL from environment variables
+  const config = useRuntimeConfig()
+  const baseURL = config.public.apiUrl || 'http://localhost/api'
 
   // Default request options
   const defaultOptions: RequestOptions = {

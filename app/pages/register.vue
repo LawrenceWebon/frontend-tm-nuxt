@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-white">
     <!-- Content -->
-    <div class="w-full max-w-md px-6">
+    <div class="px-6 w-[32rem]">
       <!-- Logo -->
       <div class="flex justify-center mb-6">
         <div class="w-12 h-12 flex items-center justify-center">
@@ -10,7 +10,7 @@
       </div>
 
       <!-- Register Card -->
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm px-16 pb-24 pt-8">
         <!-- Title -->
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-black mb-2">Create Account</h1>
@@ -37,7 +37,7 @@
         <form @submit.prevent="handleRegister" class="space-y-6" novalidate>
           <!-- Name Field -->
           <div>
-            <label for="name" class="block text-sm font-medium text-black mb-2">
+            <label for="name" class="block text-sm text-black mb-2">
               Full Name
             </label>
             <input
@@ -47,7 +47,7 @@
               required
               autocomplete="name"
               :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
+                'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
                 nameError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               ]"
               placeholder=""
@@ -61,7 +61,7 @@
 
           <!-- Email Field -->
           <div>
-            <label for="email" class="block text-sm font-medium text-black mb-2">
+            <label for="email" class="block text-sm text-black mb-2">
               Email
             </label>
             <input
@@ -71,7 +71,7 @@
               required
               autocomplete="email"
               :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
+                'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
                 emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               ]"
               placeholder=""
@@ -85,7 +85,7 @@
 
           <!-- Password Field -->
           <div>
-            <label for="password" class="block text-sm font-medium text-black mb-2">
+            <label for="password" class="block text-sm text-black mb-2">
               Password
             </label>
             <input
@@ -95,7 +95,7 @@
               required
               autocomplete="new-password"
               :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
+                'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
                 passwordError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               ]"
               placeholder=""
@@ -109,7 +109,7 @@
 
           <!-- Confirm Password Field -->
           <div>
-            <label for="passwordConfirmation" class="block text-sm font-medium text-black mb-2">
+            <label for="passwordConfirmation" class="block text-sm text-black mb-2">
               Confirm Password
             </label>
             <input
@@ -119,7 +119,7 @@
               required
               autocomplete="new-password"
               :class="[
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors',
+                'w-full px-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-colors text-sm',
                 passwordConfirmationError ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               ]"
               placeholder=""
@@ -135,7 +135,7 @@
           <button
             type="submit"
             :disabled="isLoading || !isFormValid"
-            class="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            class="w-full bg-black text-white py-2 px-1 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm"
           >
             <svg
               v-if="isLoading"

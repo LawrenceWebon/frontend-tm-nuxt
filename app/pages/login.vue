@@ -123,14 +123,14 @@
           </button>
         </form>
         <!-- Register Link -->
-        <!-- <div class="mt-6 text-center">
+        <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
             Don't have an account?
             <NuxtLink to="/register" class="font-medium text-black hover:text-gray-800 transition-colors focus:outline-none focus:underline">
               Sign up here
             </NuxtLink>
           </p>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>

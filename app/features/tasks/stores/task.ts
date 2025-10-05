@@ -266,6 +266,74 @@ export const useTaskStore = defineStore('task', {
       }
     },
 
+    async updateTaskStatus(taskId: number, status: 'pending' | 'completed') {
+      this.error = null
+      
+      try {
+        const { put } = useApi()
+        const response = await put(`/tasks/${taskId}`, { status })
+        
+        if (response.data) {
+          // Update task in local state - use reactive update
+          const index = this.tasks.findIndex((t: Task) => t.id === taskId)
+          if (index !== -1) {
+            // Update the specific property to maintain reactivity
+            this.tasks[index].status = response.data.status
+            this.tasks[index].updated_at = response.data.updated_at
+          }
+          
+          // Also update searchResults if we're in search mode
+          if (this.isSearching && this.searchResults.length > 0) {
+            const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
+            if (searchIndex !== -1) {
+              this.searchResults[searchIndex].status = response.data.status
+              this.searchResults[searchIndex].updated_at = response.data.updated_at
+            }
+          }
+        }
+        
+        return response.data
+      } catch (error: any) {
+        this.error = error.message || 'Failed to update task status'
+        console.error('Failed to update task status:', error)
+        return null
+      }
+    },
+
+    async updateTaskTitle(taskId: number, title: string) {
+      this.error = null
+      
+      try {
+        const { put } = useApi()
+        const response = await put(`/tasks/${taskId}`, { title })
+        
+        if (response.data) {
+          // Update task in local state - use reactive update
+          const index = this.tasks.findIndex((t: Task) => t.id === taskId)
+          if (index !== -1) {
+            // Update the specific property to maintain reactivity
+            this.tasks[index].title = response.data.title
+            this.tasks[index].updated_at = response.data.updated_at
+          }
+          
+          // Also update searchResults if we're in search mode
+          if (this.isSearching && this.searchResults.length > 0) {
+            const searchIndex = this.searchResults.findIndex((t: Task) => t.id === taskId)
+            if (searchIndex !== -1) {
+              this.searchResults[searchIndex].title = response.data.title
+              this.searchResults[searchIndex].updated_at = response.data.updated_at
+            }
+          }
+        }
+        
+        return response.data
+      } catch (error: any) {
+        this.error = error.message || 'Failed to update task title'
+        console.error('Failed to update task title:', error)
+        return null
+      }
+    },
+
     async reorderTasks(tasks: Task[]) {
       // Update local state immediately for responsive UI
       const updatedTasks = tasks.map((task, index) => ({

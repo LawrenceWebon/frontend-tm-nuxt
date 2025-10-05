@@ -27,9 +27,13 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    getApiUrl() {
+      const config = useRuntimeConfig()
+      return config.public.apiUrl
+    },
     async getCsrfToken() {
       try {
-        const response = await fetch('http://localhost/api/csrf-cookie', {
+        const response = await fetch(`${this.getApiUrl()}/csrf-cookie`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -54,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
         // Get CSRF token first
         const csrfToken = await this.getCsrfToken()
         
-        const response = await fetch('http://localhost/api/login', {
+        const response = await fetch(`${this.getApiUrl()}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -133,7 +137,7 @@ export const useAuthStore = defineStore('auth', {
         this.isAuthenticated = true
 
         // Verify token is still valid by fetching user data
-        const response = await fetch('http://localhost/api/user', {
+        const response = await fetch(`${this.getApiUrl()}/user`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/json'
@@ -172,7 +176,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const response = await fetch('http://localhost/api/user', {
+        const response = await fetch(`${this.getApiUrl()}/user`, {
           headers: {
             'Authorization': `Bearer ${this.token}`,
             'Accept': 'application/json'

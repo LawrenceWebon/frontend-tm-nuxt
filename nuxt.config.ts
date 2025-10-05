@@ -36,7 +36,14 @@ export default defineNuxtConfig({
   // Runtime config for API
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost',
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost/api',
+      appName: process.env.NUXT_PUBLIC_APP_NAME || 'Task Manager',
+      appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      enableAnalytics: process.env.NUXT_PUBLIC_ENABLE_ANALYTICS === 'true',
+      enableDebug: process.env.NUXT_PUBLIC_ENABLE_DEBUG === 'true',
+      csrfEnabled: process.env.NUXT_PUBLIC_CSRF_ENABLED !== 'false',
+      devTools: process.env.NUXT_PUBLIC_DEV_TOOLS === 'true'
     }
   },
 
@@ -44,7 +51,7 @@ export default defineNuxtConfig({
   nitro: {
     devProxy: {
       '/api': {
-        target: 'http://localhost',
+        target: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost',
         changeOrigin: true,
         prependPath: true
       }

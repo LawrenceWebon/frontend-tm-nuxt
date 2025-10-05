@@ -4,9 +4,17 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
+    "build:staging": "nuxt build --dotenv .env.staging",
+    "build:production": "nuxt build --dotenv .env.production",
     "dev": "nuxt dev",
+    "dev:staging": "nuxt dev --dotenv .env.staging",
+    "dev:production": "nuxt dev --dotenv .env.production",
     "generate": "nuxt generate",
+    "generate:staging": "nuxt generate --dotenv .env.staging",
+    "generate:production": "nuxt generate --dotenv .env.production",
     "preview": "nuxt preview",
+    "preview:staging": "nuxt preview --dotenv .env.staging",
+    "preview:production": "nuxt preview --dotenv .env.production",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

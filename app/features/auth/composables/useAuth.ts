@@ -100,7 +100,8 @@ export function useAuth() {
         return { success: false, error: 'Passwords do not match' }
       }
 
-      const response = await fetch('http://localhost/api/register', {
+      const config = useRuntimeConfig()
+      const response = await fetch(`${config.public.apiUrl}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +133,7 @@ export function useAuth() {
     isLoading.value = true
     
     try {
-      const response = await fetch('http://localhost/api/forgot-password', {
+      const response = await fetch(`${config.public.apiUrl}/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +167,7 @@ export function useAuth() {
         return { success: false, error: 'Passwords do not match' }
       }
 
-      const response = await fetch('http://localhost/api/reset-password', {
+      const response = await fetch(`${config.public.apiUrl}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +204,7 @@ export function useAuth() {
     isLoading.value = true
     
     try {
-      const response = await fetch('http://localhost/api/user', {
+      const response = await fetch(`${config.public.apiUrl}/user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -247,7 +248,7 @@ export function useAuth() {
         return { success: false, error: 'New passwords do not match' }
       }
 
-      const response = await fetch('http://localhost/api/user/password', {
+      const response = await fetch(`${config.public.apiUrl}/user/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

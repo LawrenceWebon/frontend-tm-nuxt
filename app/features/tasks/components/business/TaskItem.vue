@@ -38,10 +38,10 @@
         <p
           v-else
           @click="startEdit"
-          class="text-gray-900 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors text-sm flex-1 min-w-0"
+          class="text-gray-900 px-2 py-1 rounded transition-colors text-sm flex-1 min-w-0"
           :class="{ 
-            'line-through text-gray-500': task.status === 'completed',
-            'cursor-not-allowed': task.status === 'completed'
+            'line-through text-gray-500 cursor-not-allowed': task.status === 'completed',
+            'cursor-pointer hover:bg-gray-50': task.status !== 'completed'
           }"
         >
           {{ task.title }}
@@ -145,7 +145,9 @@ const emit = defineEmits<{
 const { 
   isSearching, 
   updateTask, 
-  updateTaskPriority 
+  updateTaskPriority,
+  updateTaskStatus,
+  updateTaskTitle
 } = useTask()
 
 // Computed property to avoid TypeScript comparison issues
@@ -187,13 +189,10 @@ const toggleTask = async (taskId: number) => {
   try {
     const newStatus = props.task.status === 'completed' ? 'pending' : 'completed'
     
-    await updateTask(taskId, {
-      ...props.task,
-      status: newStatus
-    })
+    await updateTaskStatus(taskId, newStatus)
   } catch (error) {
-    console.error('Failed to update task:', error)
-    alert('Failed to update task. Please try again.')
+    console.error('Failed to update task status:', error)
+    alert('Failed to update task status. Please try again.')
   }
 }
 
@@ -226,10 +225,7 @@ const saveTitle = async () => {
   }
   
   try {
-    await updateTask(props.task.id, {
-      ...props.task,
-      title: newTitle
-    })
+    await updateTaskTitle(props.task.id, newTitle)
     isEditing.value = false
   } catch (error) {
     console.error('Failed to update task title:', error)
