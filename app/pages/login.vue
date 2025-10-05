@@ -138,7 +138,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useAuth } from '../composables/useAuth'
+import { useAuth } from '../features/auth/composables/useAuth'
 import logoImage from '../../assets/images/logo.svg'
 
 // Redirect if already authenticated

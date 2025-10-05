@@ -323,12 +323,15 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useAuth } from '../composables/useAuth'
-import { useTask } from '../composables/useTask'
+import { useAuth } from '../features/auth/composables/useAuth'
+import { useTask } from '../features/tasks/composables/useTask'
 import logoImage from '../../assets/images/logo.svg'
-import { useTaskStore } from '../../stores/task'
-import { useAuthStore } from '../../stores/auth'
+import { useTaskStore } from '../features/tasks/stores/task'
+import { useAuthStore } from '../features/auth/stores/auth'
 import { useRouter } from 'vue-router'
+import SearchBar from '../features/tasks/components/ui/SearchBar.vue'
+import SortControls from '../features/tasks/components/ui/SortControls.vue'
+import DraggableTaskList from '../features/tasks/components/business/DraggableTaskList.vue'
 
 // Authentication
 const { isAuthenticated, checkAuth, user, logout } = useAuth()

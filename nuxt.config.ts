@@ -12,7 +12,25 @@ export default defineNuxtConfig({
   // Alias configuration for app directory structure
   alias: {
     '~': '.',
-    '~/app': './app'
+    '@': './app',
+    '@shared': './app/shared',
+    '@features': './app/features'
+  },
+
+  // TypeScript configuration
+  typescript: {
+    typeCheck: false
+  },
+
+  // Vite configuration for path resolution
+  vite: {
+    resolve: {
+      alias: {
+        '@': './app',
+        '@shared': './app/shared',
+        '@features': './app/features'
+      }
+    }
   },
 
   // Runtime config for API

@@ -21,6 +21,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.1"
+    "@playwright/test": "^1.55.1",
+    "vue-tsc": "^3.1.0"
   }
 }
